@@ -26,7 +26,7 @@ program main
     integer :: i !配列番号
     character(57) :: path='C:\Users\tanaka\Documents\phase-field_1d_results\result1\' !出力ファイルのpath
     integer :: record !規定変位境界出力回数
-    integer,parameter :: output_interval=1 !何ステップごとに出力するか
+    integer,parameter :: output_interval=100 !何ステップごとに出力するか
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
@@ -264,7 +264,7 @@ program main
         character(2) :: name='u_'
         character(64) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -279,7 +279,7 @@ program main
         character(2) :: name='v_'
         character(64) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -294,7 +294,7 @@ program main
         character(2) :: name='a_'
         character(64) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -309,7 +309,7 @@ program main
         character(2) :: name='c_'
         character(64) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -324,7 +324,7 @@ program main
         character(3) :: name='Bu_'
         character(65) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod-2
@@ -339,7 +339,7 @@ program main
         character(6) :: name='sigma_'
         character(68) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_ele
@@ -354,7 +354,7 @@ program main
         character(4) :: name='psi_'
         character(66) :: filename
         double precision :: x
-        write(step,"(I5.5)") timestep/output_interval
+        write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_ele
