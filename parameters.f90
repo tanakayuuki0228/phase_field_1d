@@ -65,7 +65,7 @@ module parameters
     !時間ステップ幅[s]
     double precision,parameter :: dt=dx/v_d
     !総時間ステップ数
-    integer,parameter :: total_timestep=1000
+    integer,parameter :: total_timestep=5000
     !解析される総時間[s]
     double precision,parameter :: analyzed_time=dt*total_timestep
     !================================================================

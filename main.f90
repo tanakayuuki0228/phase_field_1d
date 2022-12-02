@@ -260,11 +260,11 @@ program main
     !計算結果をファイルに出力するサブルーチン
     !================================================================
     subroutine output_u
-        character(4) :: step
+        character(5) :: step
         character(2) :: name='u_'
-        character(63) :: filename
+        character(64) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -275,11 +275,11 @@ program main
     end subroutine output_u
     !================================================================
     subroutine output_v
-        character(4) :: step
+        character(5) :: step
         character(2) :: name='v_'
-        character(63) :: filename
+        character(64) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -290,11 +290,11 @@ program main
     end subroutine output_v
     !================================================================
     subroutine output_a
-        character(4) :: step
+        character(5) :: step
         character(2) :: name='a_'
-        character(63) :: filename
+        character(64) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -305,11 +305,11 @@ program main
     end subroutine output_a
     !================================================================
     subroutine output_c
-        character(4) :: step
+        character(5) :: step
         character(2) :: name='c_'
-        character(63) :: filename
+        character(64) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
@@ -320,11 +320,11 @@ program main
     end subroutine output_c
     !================================================================
     subroutine output_Bu
-        character(4) :: step
+        character(5) :: step
         character(3) :: name='Bu_'
-        character(64) :: filename
+        character(65) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod-2
@@ -335,11 +335,11 @@ program main
     end subroutine output_Bu
     !================================================================
     subroutine output_sigma
-        character(4) :: step
+        character(5) :: step
         character(6) :: name='sigma_'
-        character(67) :: filename
+        character(68) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_ele
@@ -350,11 +350,11 @@ program main
     end subroutine output_sigma
     !================================================================
     subroutine output_psi
-        character(4) :: step
+        character(5) :: step
         character(4) :: name='psi_'
-        character(65) :: filename
+        character(66) :: filename
         double precision :: x
-        write(step,"(I4.4)") timestep/output_interval
+        write(step,"(I5.5)") timestep/output_interval
         filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_ele
