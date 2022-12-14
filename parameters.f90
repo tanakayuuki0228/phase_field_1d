@@ -59,13 +59,13 @@ module parameters
     !x方向全長[m]
     double precision,parameter :: L_x=0.1d0
     !亀裂近似幅に影響する微小パラメーター[m]
-    double precision,parameter :: L_0=0.0025d0
+    double precision,parameter :: L_0=0.01d0
     !x方向メッシュサイズ[m]（代表長）
     double precision,parameter :: dx=L_0/5d0
     !時間ステップ幅[s]
     double precision,parameter :: dt=dx/v_d
     !総時間ステップ数
-    integer,parameter :: total_timestep=5000
+    integer,parameter :: total_timestep=25000
     !解析される総時間[s]
     double precision,parameter :: analyzed_time=dt*total_timestep
     !================================================================

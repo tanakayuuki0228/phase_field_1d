@@ -24,9 +24,10 @@ program main
     integer :: timestep !時間ステップカウンター
     double precision :: t !時刻
     integer :: i !配列番号
-    character(57) :: path='C:\Users\tanaka\Documents\phase-field_1d_results\result1\' !出力ファイルのpath
+    character(57) :: path='C:\Users\tanaka\Documents\phase-field_1d_results\12.08.1\' !出力ファイルのpath
     integer :: record !規定変位境界出力回数
-    integer,parameter :: output_interval=100 !何ステップごとに出力するか
+    integer,parameter :: output_interval=1 !何ステップごとに出力するか
+    integer,parameter :: display_interval=1000
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
@@ -47,7 +48,7 @@ program main
     u=0d0
     v=0d0
     a=0d0
-    c=0d0
+    c=1d0
     record=1
     !________________________________________________________________
     !変位，速度の初期値
@@ -66,7 +67,7 @@ program main
     call output_psi
     call deallo_K
     call deallo_Bc
-    call deallo_psi
+    !call deallo_psi
     !________________________________________________________________
     !加速度の更新(初期値)
     call allo_M
@@ -76,7 +77,7 @@ program main
     call output_sigma
     call deallo_M
     call deallo_Bu
-    call deallo_sigma
+    !call deallo_sigma
     !________________________________________________________________
     !初期値の出力
     call output_u
@@ -106,26 +107,26 @@ program main
         !フェーズフィールドの更新
         call allo_K
         call allo_Bc
-        call allo_psi
+        !call allo_psi
         call calc_phasefield(c,u)
         if(mod(timestep,output_interval)==0) then
         call output_psi
         end if
         call deallo_K
         call deallo_Bc
-        call deallo_psi
+        !call deallo_psi
         !____________________________________________________________
         !加速度の更新
         call allo_M
         call allo_Bu
-        call allo_sigma
+        !call allo_sigma
         call calc_acceleration(a,u,c)
         if(mod(timestep,output_interval)==0) then
             call output_sigma
         end if
         call deallo_M
         call deallo_Bu
-        call deallo_sigma
+        !call deallo_sigma
         !____________________________________________________________
         !速度の更新(今の時間ステップの加速度の分)
         call calc_velocity(v,a)
@@ -136,7 +137,7 @@ program main
             call output_v
             call output_a
             call output_c
-            if(mod(timestep,output_interval*100)==0) then
+            if(mod(timestep,display_interval)==0) then
                 write(*,*) 'step ',timestep,' is completed'
             end if
         end if
@@ -354,6 +355,10 @@ program main
         character(4) :: name='psi_'
         character(66) :: filename
         double precision :: x
+        !ひずみエネルギー
+        do i=1,num_ele
+            psi(i)=(c(i+1)+c(i))**2d0/4d0*psi(i)
+        end do
         write(step,"(I5.5)") timestep
         filename=path//name//step
         open(10,file=filename,status='replace')
@@ -398,38 +403,48 @@ program main
     !================================================================
     subroutine output_timeshape
         character(64) :: file_timeshape
-        character(7) :: t1_name='tshape1'
-        character(7) :: t2_name='tshape2'
-        character(7) :: t3_name='tshape3'
-        integer :: tsha1=nint(num_nod/4d0)
-        integer :: tsha2=nint(num_nod/2d0)
-        integer :: tsha3=nint(3d0*num_nod/4d0)
+        character(7) :: t1_name='tstrai1'
+        character(7) :: t2_name='tstrai2'
+        character(7) :: t3_name='tstrai3'
+        character(7) :: t4_name='tstrai4'
+        integer :: tsha1=nint(num_ele/4d0)
+        integer :: tsha2=nint(num_ele/2d0)
+        integer :: tsha3=nint(3d0*num_ele/4d0)
+        integer :: tsha4=num_ele
         
         if(record==1) then
             file_timeshape=path//t1_name
             open(10,file=file_timeshape,status='replace')
-            write(10,'(e24.12,1x,e24.12)') t*10d0**6d0,u(tsha1)*10d0**9d0
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha1+1)-u(tsha1))/dx,sigma(tsha1),(c(tsha1+1)+c(tsha1))/2
             close(10)
             file_timeshape=path//t2_name
             open(10,file=file_timeshape,status='replace')
-            write(10,'(e24.12,1x,e24.12)') t*10d0**6d0,u(tsha2)*10d0**9d0
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha2+1)-u(tsha2))/dx,sigma(tsha2),(c(tsha2+1)+c(tsha2))/2
             close(10)
             file_timeshape=path//t3_name
             open(10,file=file_timeshape,status='replace')
-            write(10,'(e24.12,1x,e24.12)') t*10d0**6d0,u(tsha3)*10d0**9d0
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha3+1)-u(tsha3))/dx,sigma(tsha3),(c(tsha3+1)+c(tsha3))/2
+            close(10)
+            file_timeshape=path//t4_name
+            open(10,file=file_timeshape,status='replace')
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha4+1)-u(tsha4))/dx,sigma(tsha4),(c(tsha4+1)+c(tsha4))/2
             close(10)
         else
             file_timeshape=path//t1_name
             open(10,file=file_timeshape,status='old',position='append')
-            write(10,'(e24.12,1x,e24.12)') t*10d0**6d0,u(tsha1)*10d0**9d0
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha1+1)-u(tsha1))/dx,sigma(tsha1),(c(tsha1+1)+c(tsha1))/2
             close(10)
             file_timeshape=path//t2_name
             open(10,file=file_timeshape,status='old',position='append')
-            write(10,'(e24.12,1x,e24.12)') t*10d0**6d0,u(tsha2)*10d0**9d0
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha2+1)-u(tsha2))/dx,sigma(tsha2),(c(tsha2+1)+c(tsha2))/2
             close(10)
             file_timeshape=path//t3_name
             open(10,file=file_timeshape,status='old',position='append')
-            write(10,'(e24.12,1x,e24.12)') t*10d0**6d0,u(tsha3)*10d0**9d0
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha3+1)-u(tsha3))/dx,sigma(tsha3),(c(tsha3+1)+c(tsha3))/2
+            close(10)
+            file_timeshape=path//t4_name
+            open(10,file=file_timeshape,status='old',position='append')
+            write(10,'(e24.12,1x,e24.12,1x,e24.12)') (u(tsha3+1)-u(tsha3))/dx,sigma(tsha4),(c(tsha4+1)+c(tsha4))/2
             close(10)
         end if
     end subroutine output_timeshape
@@ -477,6 +492,8 @@ program main
         write(10,'(a,e24.12)') 'x1 = ',dx*(nint(num_nod/4d0)-1)
         write(10,'(a,e24.12)') 'x2 = ',dx*(nint(num_nod/2d0)-1)
         write(10,'(a,e24.12)') 'x3 = ',dx*(nint(3d0*num_nod/4d0)-1)
+        write(10,'(a,e24.12)') 'strain_c=',(Gc/12d0/L_0/(lamda+2d0*myu))**0.5d0
+        write(10,'(a,e24.12)') 'stress_c=',9d0/32d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
         close(10)
     end subroutine
     !================================================================ 

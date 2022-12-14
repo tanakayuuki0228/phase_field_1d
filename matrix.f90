@@ -38,11 +38,11 @@ module matrix
         !配列初期化
         K=0
         do ele=1,num_ele
-            !要素ごとの弾性エネルギーを計算
+            !要素ごとの(c=1とした時の)ひずみエネルギーを計算
             psi(ele)=(lamda/2d0+myu)*((u(ele+1)-u(ele))/dx)**2d0
             !要素方程式のKの値を計算
-            K_11=(2d0*psi(ele)-Gc/L_0)*dx/3d0+Gc*L_0/dx
-            K_12=(2d0*psi(ele)-Gc/L_0)*dx/6d0-Gc*L_0/dx
+            K_11=(2d0*psi(ele)+Gc/L_0)*dx/3d0+Gc*L_0/dx
+            K_12=(2d0*psi(ele)+Gc/L_0)*dx/6d0-Gc*L_0/dx
             !Kの記憶配列へ格納
             K(K_num(ele,1,1))=K(K_num(ele,1,1))+K_11
             K(K_num(ele,1,2))=K(K_num(ele,1,2))+K_12
@@ -87,7 +87,7 @@ module matrix
         !配列の初期化
         Bc=0
         !要素方程式のBcを計算
-        Bc1=-Gc*dx/2d0/L_0
+        Bc1=Gc*dx/2d0/L_0
         !Bcの記憶配列へ格納
         do ele=1,num_ele
             Bc(Bc_num(ele,1))=Bc(Bc_num(ele,1))+Bc1
