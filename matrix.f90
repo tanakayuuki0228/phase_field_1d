@@ -28,7 +28,15 @@ module matrix
         M(2)=density*dx
     end subroutine calc_M
     !________________________________________________________________
-
+    !non-lumed質量行列を計算するサブルーチン
+    ! subroutine calc_M(M)
+    !     double precision,intent(in out),dimension(:) :: M
+    !     do ele=1,num_nod-3
+    !         M(2*ele-1)=2d0*density*dx/3d0
+    !         M(2*ele)=density*dx/6d0
+    !     end do
+    !     M(2*(num_nod-2)-1)=2d0*density*dx/3d0
+    ! end subroutine calc_M
     !________________________________________________________________
     !フェーズフィールド方程式の左辺係数行列を計算するサブルーチン
     subroutine calc_K(K,u)

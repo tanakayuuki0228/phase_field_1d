@@ -57,15 +57,15 @@ module parameters
     !数値的パラメーター(有次元)
     !================================================================
     !x方向全長[m]
-    double precision,parameter :: L_x=0.1d0
+    double precision,parameter :: L_x=0.6d0
     !亀裂近似幅に影響する微小パラメーター[m]
-    double precision,parameter :: L_0=0.01d0
+    double precision,parameter :: L_0=0.001d0
     !x方向メッシュサイズ[m]（代表長）
-    double precision,parameter :: dx=L_0/5d0
+    double precision,parameter :: dx=L_x/320d0 !wavelen/20d0 !L_0/5d0
     !時間ステップ幅[s]
-    double precision,parameter :: dt=dx/v_d
+    double precision,parameter :: dt=dx/v_d*3d0/4d0
     !総時間ステップ数
-    integer,parameter :: total_timestep=25000
+    integer,parameter :: total_timestep=1000
     !解析される総時間[s]
     double precision,parameter :: analyzed_time=dt*total_timestep
     !================================================================
