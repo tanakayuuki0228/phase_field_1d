@@ -688,6 +688,7 @@ program main
         write(10,'(a,e24.12)') 'stress_c=',9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
         write(10,'(a,e24.12)') 'strain_weak=',(Gc_weak/3d0/L_0/(lamda+2d0*myu))**0.5d0
         write(10,'(a,e24.12)') 'stress_weak=',9d0/16d0*((lamda+2d0*myu)*Gc_weak/3d0/L_0)**0.5d0
+        write(10,'(a,e24.12)') 'energy_max=',energy_max
         close(10)
     end subroutine
     !================================================================
@@ -731,7 +732,7 @@ program main
         write(10,'(a)') "close(video);"
 
         write(10,'(a)') "disp('sig.mp4 is created');"
-        
+
         !\\\\\\\\\\\\\\\\\\\\\\\\\
 
         write(10,'(a)') "clear;"
