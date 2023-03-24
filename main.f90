@@ -38,6 +38,8 @@ program main
     integer :: record !規定変位境界出力回数
     integer :: output_interval !何ステップごとに出力するか
     integer :: display_interval !step数を画面出力する間隔
+    double precision :: energy_initial !t=0における運動エネルギー,ひずみエネルギー,破壊エネルギーの和
+    double precision :: energy_max !グラフの縦軸用,エネルギーの最大値
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
@@ -125,6 +127,7 @@ program main
     call output_psi_ela
     call output_psi_fra
     call output_psi_kin
+    call output_energy
     record=2
     !________________________________________________________________
     
@@ -172,6 +175,7 @@ program main
             call output_psi_ela
             call output_psi_fra
             call output_psi_kin
+            call output_energy
             if(display_interval<100) then
                 if(t>analyzed_time*display_interval/100d0) then
                     write(*,'(i2,a)') display_interval,'% is completed'
@@ -596,11 +600,34 @@ program main
     subroutine output_energy
         character(int_path+7) :: filename
         character(7) :: name='\energy'
+        double precision :: kinetic,strain,fracture
         filename=path//name
+        !変数初期化
+        kinetic=0
+        strain=0
+        fracture=0
+        !各種エネルギー密度を積分
+        do i=1,num_ele
+            kinetic=kinetic+density/2d0*(v(i+1)**2d0+v(i+1)*v(i)+v(i)**2d0)/3d0*dx
+            strain=strain+(c(i+1)**2d0+c(i+1)*c(i)+c(i)**2d0)/3d0*(lamda/2d0+myu)*((u(i+1)-u(i))/dx)**2d0*dx
+            fracture=fracture+Gc/2d0/L_0*((c(i+1)**2d0+c(i+1)*c(i)+c(i)**2d0-3d0*c(i+1)-3d0*c(i)+3d0)/3d0*dx&
+            +L_0**2d0*((c(i+1)-c(i))/dx)**2d0)
+        end do
+        !出力ファイル生成
         if(t=0) then
             open(10,file=filename,status='replace')
+            !初期エネルギーの記録
+            energy_initial=kinetic+strain+fracture
+            energy_max=max(kinetic,strain,fracture)
+        else
+            open(10,file=filename,status='old',position='append')
+            if(energy_max<max(kinetic,strain,fracture)) then
+                energy_max=max(kinetic,strain,fracture)
+            end if
         end if
-        
+        !出力
+        write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') t,kinetic,strain,fracture
+        close(10)
     end subroutine output_energy
     !================================================================
     subroutine output_a_exa
@@ -704,7 +731,9 @@ program main
         write(10,'(a)') "close(video);"
 
         write(10,'(a)') "disp('sig.mp4 is created');"
+        
         !\\\\\\\\\\\\\\\\\\\\\\\\\
+
         write(10,'(a)') "clear;"
         write(10,'(a)') "count=1;"
         write(10,'(a,i,a)') "num=",int(total_timestep/output_interval/10d0),";"
@@ -736,6 +765,7 @@ program main
         write(10,'(a)') "close(video);"
 
         write(10,'(a)') "disp('c.mp4 is created');"
+
         close(10)
     end subroutine output_matlab
     !=================================================================
