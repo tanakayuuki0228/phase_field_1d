@@ -614,7 +614,7 @@ program main
             +L_0**2d0*((c(i+1)-c(i))/dx)**2d0)
         end do
         !出力ファイル生成
-        if(t=0) then
+        if(t==0) then
             open(10,file=filename,status='replace')
             !初期エネルギーの記録
             energy_initial=kinetic+strain+fracture
@@ -766,6 +766,24 @@ program main
         write(10,'(a)') "close(video);"
 
         write(10,'(a)') "disp('c.mp4 is created');"
+
+        !\\\\\\\\\\\\\\\\\\\\\\\\\
+
+        write(10,'(a)') "clear;"
+        write(10,'(a)') "fig=figure;"
+
+        write(10,'(a,a,a)') "filename=append('",path,"\energy);"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2),data(:,1),data(:,3),data(:,1),data(:,4));"
+        write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
+        write(10,'(a)') "legend('kinetic','strain','fracture','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a)') "print(fig,'-djpeg',&
+        'C:\Users\tanaka\Documents\phase-field_1d_results\2023.03.24.16.05\energy.jpg','-r600');"
+
+        write(10,'(a)') "disp('energy.jpg is created');"
 
         close(10)
     end subroutine output_matlab
