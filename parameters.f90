@@ -30,6 +30,7 @@ module parameters
     double precision,parameter :: v_R=(0.862d0+1.14d0*nyu)*v_s/(1d0+nyu)
     !Griffithの破壊エネルギー[J/m**2]
     double precision,parameter :: Gc=3d0
+    double precision,parameter :: Gc_weak=Gc !*0.9d0
     !================================================================    
     
     
@@ -49,6 +50,8 @@ module parameters
     double precision,parameter :: wavelen=v_d*period
     !ガウス関数の立ち上がり時間を決めるパラメーター[s]
     double precision,parameter :: Gau=2d0*period
+    !最終引張速度
+    double precision,parameter :: v_end=1.0d0/10d0**4d0
     !================================================================
     
     
@@ -57,15 +60,21 @@ module parameters
     !数値的パラメーター(有次元)
     !================================================================
     !x方向全長[m]
-    double precision,parameter :: L_x=0.6d0
+    double precision,parameter :: L_x=0.1d0
     !亀裂近似幅に影響する微小パラメーター[m]
-    double precision,parameter :: L_0=0.001d0
+    double precision,parameter :: L_0=0.01d0
     !x方向メッシュサイズ[m]（代表長）
-    double precision,parameter :: dx=L_x/320d0 !wavelen/20d0 !L_0/5d0
+    double precision,parameter :: dx=L_0/5d0
     !時間ステップ幅[s]
-    double precision,parameter :: dt=dx/v_d*3d0/4d0
+    double precision,parameter :: dt=dx/v_d
+    !変位速度を立ち上げるまでのステップ数
+    integer,parameter :: timestep_stand=nint(1d0/10d0**5d0/dt)
+    !変位速度が立ち上がる時間
+    double precision,parameter :: time_stand=timestep_stand*dt
     !総時間ステップ数
-    integer,parameter :: total_timestep=1000
+    ! integer,parameter :: total_timestep=&
+    ! nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*L_x/v_end+time_stand/2d0)/dt*1.2d0)
+    integer,parameter :: total_timestep=100 !nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*2d0)**0.5d0/dt*1.2d0)!1000
     !解析される総時間[s]
     double precision,parameter :: analyzed_time=dt*total_timestep
     !================================================================
@@ -82,29 +91,29 @@ module parameters
         double precision :: Gauss
         double precision :: t_0=3d0*Gau
         if(n==0) then
-            !if(t<2d0*t_0) then
+            if(t<2d0*t_0) then
                 Gauss=exp(-(t-t_0)**2d0/2d0/Gau**2d0)
-            !else
-                !Gauss=0
-            !end if
+            else
+                Gauss=-t_0/Gau**2d0*exp(-t_0**2d0/2d0/Gau**2d0)*t
+            end if
         else if(n==1) then
-            !if(t<2d0*t_0) then
+            if(t<2d0*t_0) then
                 Gauss=-(t-t_0)/Gau**2d0*exp(-(t-t_0)**2d0/2d0/Gau**2d0)
-            !else
-                !Gauss=0
-            !end if
+            else
+                Gauss=-t_0/Gau**2d0*exp(-t_0**2d0/2d0/Gau**2d0)
+            end if
         else
-            !if(t<2d0*t_0) then
+            if(t<2d0*t_0) then
                 Gauss=-(1d0-(t-t_0)**2d0/Gau**2)/Gau**2d0*exp(-(t-t_0)**2d0/2d0/Gau**2d0)
-            !else
+            else
                 !Gauss=0
-            !end if
+            end if
         end if
     end function Gauss
-    !================================================================
+    !================================================================ 
     
-    
-    
+
+
     !================================================================
     !CFL条件を確認するサブルーチン
     !================================================================

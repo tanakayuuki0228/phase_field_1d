@@ -43,7 +43,8 @@ module mesh
     !Kの記憶配列を作成
     !________________________________________________________________
     !Kに要る記憶容量
-    integer,parameter :: size_K=2*num_nod-1
+    ! integer,parameter :: size_K=2*num_nod-1
+    integer,parameter :: size_K=2*num_nod-5 !両端c=0
     !Kの数値を記憶する配列
     double precision,allocatable,dimension(:) :: K
     !________________________________________________________________
@@ -61,7 +62,8 @@ module mesh
     !Bcの記憶配列
     !________________________________________________________________
     !Bcに要る記憶容量
-    integer,parameter :: size_Bc=num_nod
+    ! integer,parameter :: size_Bc=num_nod
+    integer,parameter :: size_Bc=num_nod-2 !両端c=0
     !Bcの数値を記憶する配列
     double precision,allocatable,dimension(:) :: Bc
     !================================================================
@@ -75,7 +77,6 @@ module mesh
     integer,parameter :: size_psi=num_ele
     double precision,allocatable,dimension(:) :: psi
 
-    
     contains
     !================================================================
     !配列を割り付け,開放するサブルーチン
@@ -140,7 +141,8 @@ module mesh
         integer,intent(in) :: ele,row,col
         !全体の方程式の記憶配列での配列番号
         integer :: K_num
-        K_num=2*ele-1+row-1+col-1
+        ! K_num=2*ele-1+row-1+col-1
+        K_num=2*ele-1+row-1+col-1-2 !両端c=0
     end function K_num
     !________________________________________________________________
     !Bu用
@@ -168,7 +170,8 @@ module mesh
         integer,intent(in) :: ele,row
         !全体の方程式の記憶配列での配列番号
         integer :: Bc_num
-        Bc_num=ele-1+row
+        ! Bc_num=ele-1+row
+        Bc_num=ele-1+row-1 !両端c=0
     end function Bc_num
     !================================================================
     

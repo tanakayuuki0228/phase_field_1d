@@ -36,12 +36,25 @@ program main
     character(5) :: zone
     integer :: timevalue(8)
     integer :: record !規定変位境界出力回数
-    integer,parameter :: output_interval=1 !何ステップごとに出力するか
-    integer,parameter :: display_interval=100 !step数を画面出力する間隔
+    integer :: output_interval !何ステップごとに出力するか
+    integer :: display_interval !step数を画面出力する間隔
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
     pt=0 !first call のときに0に初期化されていなくてはならない,途中で自分が書き換えてはいけない
+    !================================================================
+
+    t=0
+    !================================================================
+    !出力間隔を決定
+    do while (10d0**t<total_timestep)
+        t=t+1d0
+    end do
+    if(t>5d0) then
+        output_interval=10**nint(t-5d0)
+    else
+        output_interval=1
+    end if
     !================================================================
 
     !================================================================
@@ -60,9 +73,10 @@ program main
 
     !パラメータの出力
     call output_para
+    call output_matlab
     !CFL条件を確認
     call CFL(dx,dt)
-    call output_a_300
+    call output_a_exa
     !================================================================
     !計算アルゴリズム
     !================================================================
@@ -75,6 +89,7 @@ program main
     a=0d0
     c=1d0
     record=1
+    display_interval=1
     !________________________________________________________________
     !変位，速度の初期値
     u=0d0
@@ -106,6 +121,10 @@ program main
     call output_v
     call output_a
     call output_c
+    call output_sigma
+    call output_psi_ela
+    call output_psi_fra
+    call output_psi_kin
     record=2
     !________________________________________________________________
     
@@ -149,14 +168,21 @@ program main
             call output_v
             call output_a
             call output_c
-            if(mod(timestep,display_interval)==0) then
-                write(*,*) 'step ',timestep,' is completed'
+            call output_sigma
+            call output_psi_ela
+            call output_psi_fra
+            call output_psi_kin
+            if(display_interval<100) then
+                if(t>analyzed_time*display_interval/100d0) then
+                    write(*,'(i2,a)') display_interval,'% is completed'
+                    display_interval=display_interval+1
+                end if
             end if
         end if
         !____________________________________________________________
     end do
+
     !================================================================
-    
 
     contains
     !================================================================
@@ -165,9 +191,18 @@ program main
     !変位規定境界の変位，速度，加速度を更新するサブルーチン
     subroutine calc_pre_dis
         !(変位規定境界の)変位，速度，加速度を更新
-        u(num_nod)=Amp*Gauss(t,0)*sin(w*t) !0.5d0*L_x*t**2d0
-        v(num_nod)=Amp*(Gauss(t,1)*sin(w*t)+Gauss(t,0)*w*cos(w*t)) !L_x*t
-        a(num_nod)=Amp*(Gauss(t,2)*sin(w*t)+2*Gauss(t,1)*w*cos(w*t)-Gauss(t,0)*w**2d0*sin(w*t)) !L_x
+        if(t<time_stand) then
+            u(num_nod)=(t-time_stand/2d0/pi*sin(2d0*pi*t/time_stand))/2d0*v_end
+            v(num_nod)=(1d0-cos(2d0*pi*t/time_stand))/2d0*v_end
+            a(num_nod)=pi/time_stand*sin(2d0*pi*t/time_stand)*v_end
+        else
+            u(num_nod)=(t-time_stand/2d0)*v_end
+            v(num_nod)=v_end
+            a(num_nod)=0d0
+        end if
+        ! u(num_nod)=0.5d0*L_x*t**2d0 !Amp*Gauss(t,0)*sin(w*t)
+        ! v(num_nod)=L_x*t !Amp*(Gauss(t,1)*sin(w*t)+Gauss(t,0)*w*cos(w*t))
+        ! a(num_nod)=L_x !Amp*(Gauss(t,2)*sin(w*t)+2*Gauss(t,1)*w*cos(w*t)-Gauss(t,0)*w**2d0*sin(w*t))
     end subroutine calc_pre_dis
     !________________________________________________________________
     !変位を更新するサブルーチン
@@ -265,63 +300,127 @@ program main
     ! end subroutine calc_acceleration
     !________________________________________________________________
     !フェーズフィールドを更新するサブルーチン
+    ! subroutine calc_phasefield(c,u)
+    !     double precision,intent(in),dimension(:) :: u
+    !     double precision,intent(in out),dimension(:) :: c
+    !     !================================================================
+    !     !PARDISOの設定
+    !     !================================================================
+    !     !! integer,dimension(64),save :: pt !ここでptを宣言するとaccess violation がでる,原因は不明
+    !     integer,save :: maxfct
+    !     integer,save :: mnum
+    !     integer,save :: mtype
+    !     integer,save :: n
+    !     integer,save :: phase
+    !     integer,save,dimension(num_nod+1) :: ia
+    !     integer,save,dimension(2*num_nod-1) :: ja
+    !     integer,save,dimension(num_nod) :: perm
+    !     integer,save :: nrhs
+    !     integer,save,dimension(64) :: iparm
+    !     integer,save :: msglvl
+    !     integer,save :: error
+    !     if(t==0) then
+    !         pt=0
+    !         maxfct=1
+    !         mnum=1
+    !         mtype=-2 !実対称不定値行列,num_nod×num_nod三重対角行列
+    !         n=num_nod
+    !         phase=13
+    !         nrhs=1
+    !         iparm(1)=0 !iparm(1)=0で,iparm(2)-iparm(64)がdefaultに設定される
+    !         msglvl=0
+
+    !         !ia(i) aのうち,Kのi行で最初の要素のindex
+    !         do i=1,num_nod
+    !             ia(i)=2*i-1
+    !         end do
+
+    !         !ia(n+1) aの要素の数+1
+    !         ia(num_nod+1)=2*num_nod
+            
+    !         !ja(i) a(i)はKの第何列成分か
+    !         do i=1,num_nod
+    !             ja(2*i-1)=i
+    !         end do
+    !         do i=1,num_nod-1
+    !             ja(2*i)=i+1
+    !         end do
+    !     else if(t==dt) then
+    !         phase=23
+    !     else
+
+    !     end if
+    !     !================================================================
+    !     !左辺係数行列の計算
+    !     call calc_K(K,u)
+    !     !右辺ベクトルの計算
+    !     call calc_Bc(Bc)
+    !     !PARDISOで連立方程式を解く
+    !     call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c,error)
+    ! end subroutine calc_phasefield
+    !________________________________________________________________
+    !フェーズフィールドを更新するサブルーチン 両端c=0
     subroutine calc_phasefield(c,u)
         double precision,intent(in),dimension(:) :: u
         double precision,intent(in out),dimension(:) :: c
+        double precision,dimension(num_nod-2) :: c_sol
         !================================================================
         !PARDISOの設定
         !================================================================
-        ! integer,dimension(64),save :: pt !ここでptを宣言するとaccess violation がでる,原因は不明
-        ! integer,save :: maxfct
-        ! integer,save :: mnum
-        ! integer,save :: mtype
-        ! integer,save :: n
-        ! integer,save :: phase
-        ! integer,save,dimension(num_nod+1) :: ia
-        ! integer,save,dimension(2*num_nod-1) :: ja
-        ! integer,save,dimension(num_nod) :: perm
-        ! integer,save :: nrhs
-        ! integer,save,dimension(64) :: iparm
-        ! integer,save :: msglvl
-        ! integer,save :: error
-        ! if(t==0) then
-        !     pt=0
-        !     maxfct=1
-        !     mnum=1
-        !     mtype=-2 !実対称不定値行列,num_nod×num_nod三重対角行列
-        !     n=num_nod
-        !     phase=13
-        !     nrhs=1
-        !     iparm(1)=0 !iparm(1)=0で,iparm(2)-iparm(64)がdefaultに設定される
-        !     msglvl=0
+        !! integer,dimension(64),save :: pt !ここでptを宣言するとaccess violation がでる,原因は不明
+        integer,save :: maxfct
+        integer,save :: mnum
+        integer,save :: mtype
+        integer,save :: n
+        integer,save :: phase
+        integer,save,dimension(num_nod-1) :: ia
+        integer,save,dimension(2*num_nod-5) :: ja
+        integer,save,dimension(num_nod-2) :: perm
+        integer,save :: nrhs
+        integer,save,dimension(64) :: iparm
+        integer,save :: msglvl
+        integer,save :: error
+        if(t==0) then
+            pt=0
+            maxfct=1
+            mnum=1
+            mtype=-2 !実対称不定値行列,num_nod×num_nod三重対角行列
+            n=num_nod-2
+            phase=13
+            nrhs=1
+            iparm(1)=0 !iparm(1)=0で,iparm(2)-iparm(64)がdefaultに設定される
+            msglvl=0
 
-        !     !ia(i) aのうち,Kのi行で最初の要素のindex
-        !     do i=1,num_nod
-        !         ia(i)=2*i-1
-        !     end do
+            !ia(i) aのうち,Kのi行で最初の要素のindex
+            do i=1,num_nod-2
+                ia(i)=2*i-1
+            end do
 
-        !     !ia(n+1) aの要素の数+1
-        !     ia(num_nod+1)=2*num_nod
+            !ia(n+1) aの要素の数+1
+            ia(num_nod-1)=2*num_nod-4
             
-        !     !ja(i) a(i)はKの第何列成分か
-        !     do i=1,num_nod
-        !         ja(2*i-1)=i
-        !     end do
-        !     do i=1,num_nod-1
-        !         ja(2*i)=i+1
-        !     end do
-        ! else if(t==dt) then
-        !     phase=23
-        ! else
+            !ja(i) a(i)はKの第何列成分か
+            do i=1,num_nod-2
+                ja(2*i-1)=i
+            end do
+            do i=1,num_nod-3
+                ja(2*i)=i+1
+            end do
+        else if(t==dt) then
+            phase=23
+        else
 
-        ! end if
-        ! !================================================================
-        ! !左辺係数行列の計算
-        ! call calc_K(K,u)
-        ! !右辺ベクトルの計算
-        ! call calc_Bc(Bc)
-        ! !PARDISOで連立方程式を解く
-        ! call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c,error)
+        end if
+        !================================================================
+        !左辺係数行列の計算
+        call calc_K(K,u)
+        !右辺ベクトルの計算
+        call calc_Bc(Bc,u)
+        !PARDISOで連立方程式を解く
+        call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c_sol,error)
+        do i=2,num_nod-1
+            c(i)=c_sol(i-1)
+        end do
     end subroutine calc_phasefield
     !================================================================
     
@@ -370,7 +469,7 @@ program main
     subroutine output_a
         character(5) :: step
         character(5) :: name='\a\a_'
-        character(int_path+9) :: filename
+        character(int_path+10) :: filename
         double precision :: x
         write(command,*) 'mkdir -p ',path,'\a'
         if(t==0) then
@@ -389,7 +488,7 @@ program main
     subroutine output_c
         character(5) :: step
         character(5) :: name='\c\c_'
-        character(int_path+9) :: filename
+        character(int_path+10) :: filename
         double precision :: x
         write(command,*) 'mkdir -p ',path,'\c'
         if(t==0) then
@@ -405,27 +504,125 @@ program main
         close(10)
     end subroutine output_c
     !================================================================
-    
+    subroutine output_sigma
+        character(5) :: step
+        character(9) :: name='\sig\sig_'
+        character(int_path+14) :: filename
+        double precision :: x,sig
+        write(command,*) 'mkdir -p ',path,'\sig'
+        if(t==0) then
+            call system(command)
+        end if
+        write(step,"(I5.5)") timestep/output_interval
+        filename=path//name//step
+        open(10,file=filename,status='replace')
+        do i=1,num_ele
+            x=dx*(i-1)
+            sig=c(i)**2d0*(lamda+2d0*myu)*(u(i+1)-u(i))/dx
+            write(10,'(e24.12,1x,e24.12e4)') x,sig
+            x=dx*i
+            sig=c(i+1)**2d0*(lamda+2d0*myu)*(u(i+1)-u(i))/dx
+            write(10,'(e24.12,1x,e24.12e4)') x,sig
+        end do
+        close(10)
+    end subroutine output_sigma
     !================================================================
-    subroutine output_a_300
-        character(int_path+12) :: filename
-        character(12) :: name='\a_00300_exa'
-        double precision :: t,x,a_exa
-        filename=path//name
+    subroutine output_psi_ela
+        character(5) :: step
+        character(16) :: name='\psi_ela\psi_ela_'
+        character(int_path+21) :: filename
+        double precision :: x,psi_ela
+        write(command,*) 'mkdir -p ',path,'\psi_ela'
+        if(t==0) then
+            call system(command)
+        end if
+        write(step,"(I5.5)") timestep/output_interval
+        filename=path//name//step
+        open(10,file=filename,status='replace')
+        do i=1,num_ele
+            x=dx*(i-1)
+            psi_ela=c(i)**2d0*(lamda/2d0+myu)*((u(i+1)-u(i))/dx)**2d0
+            write(10,'(e24.12,1x,e24.12e4)') x,psi_ela
+            x=dx*i
+            psi_ela=c(i+1)**2d0*(lamda/2d0+myu)*((u(i+1)-u(i))/dx)**2d0
+            write(10,'(e24.12,1x,e24.12e4)') x,psi_ela
+        end do
+        close(10)
+    end subroutine output_psi_ela
+    !================================================================
+    subroutine output_psi_kin
+        character(5) :: step
+        character(16) :: name='\psi_kin\psi_kin_'
+        character(int_path+21) :: filename
+        double precision :: x,psi_kin
+        write(command,*) 'mkdir -p ',path,'\psi_kin'
+        if(t==0) then
+            call system(command)
+        end if
+        write(step,"(I5.5)") timestep/output_interval
+        filename=path//name//step
         open(10,file=filename,status='replace')
         do i=1,num_nod
             x=dx*(i-1)
-            t=dt*300d0-(L_x-x)/v_d
+            psi_kin=density*v(i)**2d0/2d0
+            write(10,'(e24.12,1x,e24.12e4)') x,psi_kin
+        end do
+        close(10)
+    end subroutine output_psi_kin
+    !================================================================
+    subroutine output_psi_fra
+        character(5) :: step
+        character(16) :: name='\psi_fra\psi_fra_'
+        character(int_path+21) :: filename
+        double precision :: x,psi_fra
+        write(command,*) 'mkdir -p ',path,'\psi_fra'
+        if(t==0) then
+            call system(command)
+        end if
+        write(step,"(I5.5)") timestep/output_interval
+        filename=path//name//step
+        open(10,file=filename,status='replace')
+        do i=1,num_ele
+            x=dx*(i-1)
+            psi_fra=Gc/2d0/L_0*((1d0-c(i))**2d0+L_0**2d0*((c(i+1)-c(i))/dx)**2d0)
+            write(10,'(e24.12,1x,e24.12e4)') x,psi_fra
+            x=dx*i
+            psi_fra=Gc/2d0/L_0*((1d0-c(i+1))**2d0+L_0**2d0*((c(i+1)-c(i))/dx)**2d0)
+            write(10,'(e24.12,1x,e24.12e4)') x,psi_fra
+        end do
+        close(10)
+    end subroutine output_psi_fra
+    !================================================================
+    subroutine output_energy
+        character(int_path+7) :: filename
+        character(7) :: name='\energy'
+        filename=path//name
+        if(t=0) then
+            open(10,file=filename,status='replace')
+        end if
+        
+    end subroutine output_energy
+    !================================================================
+    subroutine output_a_exa
+        character(int_path+12) :: filename
+        character(6) :: name='\a_exa'
+        double precision :: t,x,a_exa
+        filename=path//name
+        open(10,file=filename,status='replace')
+        do i=1,100001
+            x=L_x/2d0
+            t=4d0/10d0**9d0*(i-1)-L_x/2d0/v_d
             if(t>0) then
                 a_exa=Amp*(Gauss(t,2)*sin(w*t)+2*Gauss(t,1)*w*cos(w*t)-Gauss(t,0)*w**2d0*sin(w*t))
-                write(10,'(e24.12,1x,e24.12)') x,a_exa
+                write(10,'(e24.12,1x,e24.12)') 4d0/10d0**9d0*(i-1),a_exa
             else
-                write(10,'(e24.12,1x,e24.12)') x,0
+                write(10,'(e24.12,1x,e24.12)') 4d0/10d0**9d0*(i-1),0
             end if
         end do
         close(10)
-    end subroutine output_a_300
+    end subroutine output_a_exa
     !================================================================
+
 
     
     !================================================================
@@ -462,7 +659,84 @@ program main
         write(10,'(a,e24.12)') 'x3 = ',dx*(nint(3d0*num_nod/4d0)-1)
         write(10,'(a,e24.12)') 'strain_c=',(Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0
         write(10,'(a,e24.12)') 'stress_c=',9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
+        write(10,'(a,e24.12)') 'strain_weak=',(Gc_weak/3d0/L_0/(lamda+2d0*myu))**0.5d0
+        write(10,'(a,e24.12)') 'stress_weak=',9d0/16d0*((lamda+2d0*myu)*Gc_weak/3d0/L_0)**0.5d0
         close(10)
     end subroutine
-    !================================================================ 
+    !================================================================
+    !ビデオを作るmatlabの.mファイルを作る
+    !================================================================
+    subroutine output_matlab
+        character(64) :: filename_m
+        double precision :: strain_c
+        strain_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
+        filename_m='C:\Users\tanaka\Documents\phase_field_1d_newest_code\makevideo.m'
+        open(10,file=filename_m,status='replace')
+        write(10,'(a)') "clear;"
+        write(10,'(a)') "count=1;"
+        write(10,'(a,i,a)') "num=",int(total_timestep/output_interval/10d0),";"
+        write(10,'(a)') "fig=figure;"
+        write(10,'(a)') "frames(num+1)=struct('cdata',[],'colormap',[]);"
+        
+        write(10,'(a)') "for i=0:num"
+
+        write(10,'(a)') "if i>count*num/10"
+        write(10,'(a)') "message=[sprintf('%2u0',count),'% is completed'];"
+        write(10,'(a)') "disp(message);"
+        write(10,'(a)') "count=count+1;"
+        write(10,'(a)') "end"
+
+        write(10,'(a)') "filenum=sprintf('%04u0',i);"
+        write(10,'(a,a,a)') "filename=append('",path,"\sig\sig_',filenum);"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "[sigmax,index]=max(data(:,2));"
+        write(10,'(a)') "plot(data(:,1),data(:,2),data(index,1),data(index,2),'pentagram');"
+        write(10,'(a,e24.12,a)') "xlim([0 ",L_x,"]);"
+        write(10,'(a,e24.12,1x,e24.12,a)') "ylim([",-1.1d0*strain_c,1.1d0*strain_c,"]);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a)') "frames(i+1)=getframe(fig);"
+        write(10,'(a)') "end"
+        write(10,'(a,a,a)') "video=VideoWriter('",path,"\sig.mp4','MPEG-4');"
+        write(10,'(a)') "video.Quality=100;"
+        write(10,'(a)') "video.FrameRate=160;"
+        write(10,'(a)') "open(video);"
+        write(10,'(a)') "writeVideo(video,frames);"
+        write(10,'(a)') "close(video);"
+
+        write(10,'(a)') "disp('sig.mp4 is created');"
+        !\\\\\\\\\\\\\\\\\\\\\\\\\
+        write(10,'(a)') "clear;"
+        write(10,'(a)') "count=1;"
+        write(10,'(a,i,a)') "num=",int(total_timestep/output_interval/10d0),";"
+        write(10,'(a)') "fig=figure;"
+        write(10,'(a)') "frames(num+1)=struct('cdata',[],'colormap',[]);"
+
+        write(10,'(a)') "for i=0:num"
+        
+        write(10,'(a)') "if i>count*num/10"
+        write(10,'(a)') "message=[sprintf('%2u0',count),'% is completed'];"
+        write(10,'(a)') "disp(message);"
+        write(10,'(a)') "count=count+1;"
+        write(10,'(a)') "end"
+
+        write(10,'(a)') "filenum=sprintf('%04u0',i);"
+        write(10,'(a,a,a)') "filename=append('",path,"\c\c_',filenum);"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "xlim([0 ",L_x,"]);"
+        write(10,'(a)') "ylim([-0.01 1.01]);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a)') "frames(i+1)=getframe(fig);"
+        write(10,'(a)') "end"
+        write(10,'(a,a,a)') "video=VideoWriter('",path,"\c.mp4','MPEG-4');"
+        write(10,'(a)') "video.Quality=100;"
+        write(10,'(a)') "video.FrameRate=160;"
+        write(10,'(a)') "open(video);"
+        write(10,'(a)') "writeVideo(video,frames);"
+        write(10,'(a)') "close(video);"
+
+        write(10,'(a)') "disp('c.mp4 is created');"
+        close(10)
+    end subroutine output_matlab
+    !=================================================================
 end program main
