@@ -68,9 +68,6 @@ program main
     path=path_//folder
     write(command,*) 'mkdir -p ',path
     call system(command)
-    !folderにコードをディレクトリごとコピー
-    write(command,*) 'cp -r C:\Users\tanaka\Documents\phase_field_1d_newest_code ',path
-    call system(command)
     !================================================================
 
     !パラメータの出力
@@ -186,6 +183,9 @@ program main
         !____________________________________________________________
     end do
 
+    !folderにコードをディレクトリごとコピー
+    write(command,*) 'cp -r C:\Users\tanaka\Documents\phase_field_1d_newest_code ',path
+    call system(command)
     !================================================================
 
     contains
@@ -598,10 +598,13 @@ program main
     end subroutine output_psi_fra
     !================================================================
     subroutine output_energy
-        character(int_path+7) :: filename
-        character(7) :: name='\energy'
-        double precision :: kinetic,strain,fracture
-        filename=path//name
+        character(int_path+7) :: filename_1
+        character(int_path+13) :: filename_2
+        character(7) :: name_1='\energy'
+        character(13) :: name_2='\energy_total'
+        double precision :: kinetic,strain,fracture,total
+        filename_1=path//name_1
+        filename_2=path//name_2
         !変数初期化
         kinetic=0
         strain=0
@@ -611,23 +614,31 @@ program main
             kinetic=kinetic+density/2d0*(v(i+1)**2d0+v(i+1)*v(i)+v(i)**2d0)/3d0*dx
             strain=strain+(c(i+1)**2d0+c(i+1)*c(i)+c(i)**2d0)/3d0*(lamda/2d0+myu)*((u(i+1)-u(i))/dx)**2d0*dx
             fracture=fracture+Gc/2d0/L_0*((c(i+1)**2d0+c(i+1)*c(i)+c(i)**2d0-3d0*c(i+1)-3d0*c(i)+3d0)/3d0*dx&
-            +L_0**2d0*((c(i+1)-c(i))/dx)**2d0)
+            +L_0**2d0*((c(i+1)-c(i))/dx)**2d0*dx)
         end do
-        !出力ファイル生成
+        total=kinetic+strain+fracture
+        !出力
         if(t==0) then
-            open(10,file=filename,status='replace')
+            open(10,file=filename_1,status='replace')
+            write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') t,kinetic,strain,fracture
+            close(10)
+            open(10,file=filename_2,status='replace')
+            write(10,'(e24.12)') total
+            close(10)
             !初期エネルギーの記録
             energy_initial=kinetic+strain+fracture
             energy_max=max(kinetic,strain,fracture)
         else
-            open(10,file=filename,status='old',position='append')
+            open(10,file=filename_1,status='old',position='append')
+            write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') t,kinetic,strain,fracture
+            close(10)
+            open(10,file=filename_2,status='old',position='append')
+            write(10,'(e24.12)') total
+            close(10)
             if(energy_max<max(kinetic,strain,fracture)) then
                 energy_max=max(kinetic,strain,fracture)
             end if
         end if
-        !出力
-        write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') t,kinetic,strain,fracture
-        close(10)
     end subroutine output_energy
     !================================================================
     subroutine output_a_exa
@@ -688,7 +699,7 @@ program main
         write(10,'(a,e24.12)') 'stress_c=',9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
         write(10,'(a,e24.12)') 'strain_weak=',(Gc_weak/3d0/L_0/(lamda+2d0*myu))**0.5d0
         write(10,'(a,e24.12)') 'stress_weak=',9d0/16d0*((lamda+2d0*myu)*Gc_weak/3d0/L_0)**0.5d0
-        write(10,'(a,e24.12)') 'energy_max=',energy_max
+        ! write(10,'(a,e24.12)') 'energy_max=',energy_max
         close(10)
     end subroutine
     !================================================================
@@ -772,16 +783,18 @@ program main
         write(10,'(a)') "clear;"
         write(10,'(a)') "fig=figure;"
 
-        write(10,'(a,a,a)') "filename=append('",path,"\energy);"
-        write(10,'(a)') "data=load(filename);"
-        write(10,'(a)') "plot(data(:,1),data(:,2),data(:,1),data(:,3),data(:,1),data(:,4));"
+        write(10,'(a,a,a)') "filename=append('",path,"\energy');"
+        write(10,'(a)') "data_1=load(filename);"
+        write(10,'(a,a,a)') "filename=append('",path,"\energy_total');"
+        write(10,'(a)') "data_2=load(filename);"
+        write(10,'(a)') "plot(data_1(:,1),data_1(:,2),data_1(:,1),data_1(:,3),data_1(:,1),data_1(:,4),&
+        data_1(:,1),data_2(:,1));"
         write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
-        write(10,'(a)') "legend('kinetic','strain','fracture','Location','NorthEastOutside');"
-        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A'};"
+        write(10,'(a)') "legend('kinetic','strain','fracture','total','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000'};"
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
-        write(10,'(a)') "print(fig,'-djpeg',&
-        'C:\Users\tanaka\Documents\phase-field_1d_results\2023.03.24.16.05\energy.jpg','-r600');"
+        write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy.jpg','-r600');"
 
         write(10,'(a)') "disp('energy.jpg is created');"
 
