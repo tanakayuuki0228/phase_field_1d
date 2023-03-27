@@ -40,6 +40,7 @@ program main
     integer :: display_interval !step数を画面出力する間隔
     double precision :: energy_initial !t=0における運動エネルギー,ひずみエネルギー,破壊エネルギーの和
     double precision :: energy_max !グラフの縦軸用,エネルギーの最大値
+    integer :: count_3,count_4,count_5 !c=0となったtimestepを記憶 
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
@@ -89,6 +90,9 @@ program main
     c=1d0
     record=1
     display_interval=1
+    count_3=0
+    count_4=0
+    count_5=0
     !________________________________________________________________
     !変位，速度の初期値
     u=0d0
@@ -173,6 +177,7 @@ program main
             call output_psi_fra
             call output_psi_kin
             call output_energy
+            call break_check
             if(display_interval<100) then
                 if(t>analyzed_time*display_interval/100d0) then
                     write(*,'(i2,a)') display_interval,'% is completed'
@@ -660,9 +665,32 @@ program main
         close(10)
     end subroutine output_a_exa
     !================================================================
+    subroutine break_check
+        if(count_3==0) then
+            do i=1,num_nod
+                if(c(i)<1d0/10d0**3d0) then
+                    count_3=timestep/output_interval
+                end if
+            end do
+        end if
+        if(count_4==0) then
+            do i=1,num_nod
+                if(c(i)<1d0/10d0**4d0) then
+                    count_4=timestep/output_interval
+                end if
+            end do
+        end if
+        if(count_5==0) then
+            do i=1,num_nod
+                if(c(i)<1d0/10d0**5d0) then
+                    count_5=timestep/output_interval
+                end if
+            end do
+        end if
+    end subroutine break_check
+    !================================================================
 
 
-    
     !================================================================
     !パラメーターをファイルに出力するサブルーチン
     !================================================================
@@ -768,7 +796,9 @@ program main
         write(10,'(a)') "ylim([-0.01 1.01]);"
         write(10,'(a)') "drawnow;"
         write(10,'(a)') "frames(i+1)=getframe(fig);"
+
         write(10,'(a)') "end"
+
         write(10,'(a,a,a)') "video=VideoWriter('",path,"\c.mp4','MPEG-4');"
         write(10,'(a)') "video.Quality=100;"
         write(10,'(a)') "video.FrameRate=160;"
@@ -791,12 +821,54 @@ program main
         data_1(:,1),data_2(:,1));"
         write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
         write(10,'(a)') "legend('kinetic','strain','fracture','total','Location','NorthEastOutside');"
-        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000'};"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy.jpg','-r600');"
 
         write(10,'(a)') "disp('energy.jpg is created');"
+
+        !\\\\\\\\\\\\\\\\\\\\\\\\\
+        write(10,'(a)') "clear;"
+        write(10,'(a)') "count=1;"
+        write(10,'(a,i,a)') "n_3=",count_3,";"
+        write(10,'(a,i,a)') "n_4=",count_4,";"
+        write(10,'(a,i,a)') "n_5=",count_5,";"
+        write(10,'(a,i,a)') "num_2=",0,";"
+        write(10,'(a,i,a)') "num_3=",nint(num_ele*2d0/4d0),";"
+        write(10,'(a,i,a)') "num_4=",num_ele,";"
+        write(10,'(a,i,a)') "num_5=",nint(num_ele*2d0/4d0*3d0),";"
+        write(10,'(a,i,a)') "num_6=",num_ele*2,";"
+        
+        write(10,'(a)') "fig=figure;"
+        
+        write(10,'(a)') "for i=0:n_5"
+
+        write(10,'(a)') "filenum=sprintf('%04u0',i);"
+        write(10,'(a,a,a)') "filename=append('",path,"\u\u_',filenum);"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a,i,a)') "sig(i+1,1)=data(",num_nod,",2);"
+        write(10,'(a,a,a)') "filename=append('",path,"\sig\sig_',filenum);"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "sig(i+1,2)=data(num_2,2);"
+        write(10,'(a)') "sig(i+1,3)=data(num_3,2);"
+        write(10,'(a)') "sig(i+1,3)=(sig(i+1,3)+data(num_3+1,2))/2;"
+        write(10,'(a)') "sig(i+1,4)=data(num_4,2);"
+        write(10,'(a)') "sig(i+1,4)=(sig(i+1,4)+data(num_4+1,2))/2;"
+        write(10,'(a)') "sig(i+1,5)=data(num_5,2);"
+        write(10,'(a)') "sig(i+1,5)=(sig(i+1,5)+data(num_5+1,2))/2;"
+        write(10,'(a)') "sig(i+1,6)=data(num_6,2);"
+
+        write(10,'(a)') "end"
+
+        write(10,'(a)') "plot(sig(1:n_3+1,1),sig(1:n_3+1,2),sig(1:n_3+1,1),sig(1:n_3+1,3)&
+        ,sig(1:n_3+1,1),sig(1:n_3+1,4),sig(1:n_3+1,1),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
+        write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
+        write(10,'(a)') "legend('kinetic','strain','fracture','total','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy.jpg','-r600');"
 
         close(10)
     end subroutine output_matlab
