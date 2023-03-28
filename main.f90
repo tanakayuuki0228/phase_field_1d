@@ -189,7 +189,7 @@ program main
     end do
 
     !folderにコードをディレクトリごとコピー
-    write(command,*) 'cp -r C:\Users\tanaka\Documents\phase_field_1d_newest_code ',path
+    write(command,*) 'cp -r C:\Users\tanaka\Documents\phase_field_1d_newest_code\phase_field_1d ',path
     call system(command)
     !================================================================
 
@@ -738,7 +738,7 @@ program main
         character(5) :: step
         double precision :: strain_c
         strain_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
-        filename_m='C:\Users\tanaka\Documents\phase_field_1d_newest_code\makevideo.m'
+        filename_m='C:\Users\tanaka\Documents\phase_field_1d_newest_code\phase_field_1d\makevideo.m'
         open(10,file=filename_m,status='replace')
         write(10,'(a)') "clear;"
         write(10,'(a)') "count=1;"
@@ -875,8 +875,8 @@ program main
         ,sig(1:n_3+1,1),sig(1:n_3+1,4),sig(1:n_3+1,1),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
         write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
         write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
-        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
-        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,",'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
@@ -888,8 +888,8 @@ program main
         ,sig(1:n_4+1,1),sig(1:n_4+1,4),sig(1:n_4+1,1),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
         write(10,'(a)') "xlim([0 sig(n_4+1,1)]);"
         write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
-        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
-        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,",'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
@@ -901,8 +901,8 @@ program main
         ,sig(1:n_5+1,1),sig(1:n_5+1,4),sig(1:n_5+1,1),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
         write(10,'(a)') "xlim([0 sig(n_5+1,1)]);"
         write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
-        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
-        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,",'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
@@ -917,14 +917,42 @@ program main
         ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
         write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
         write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
-        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
-        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
+        write(10,'(a)') "yline(0.75,'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_3
         write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+
+        write(10,'(a)') "plot(sig(1:n_4+1,2),c(1:n_4+1,2),sig(1:n_4+1,3),c(1:n_4+1,3)&
+        ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_4+1,1)]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
+        write(10,'(a)') "yline(0.75,'--');"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_4
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+
+        write(10,'(a)') "plot(sig(1:n_5+1,2),c(1:n_5+1,2),sig(1:n_5+1,3),c(1:n_5+1,3)&
+        ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_5+1,1)]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
+        write(10,'(a)') "yline(0.75,'--');"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_5
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+
+        write(10,'(a)') "disp('c-sig.jpg is created');"
 
         close(10)
     end subroutine output_matlab
