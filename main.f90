@@ -874,7 +874,7 @@ program main
         write(10,'(a)') "plot(sig(1:n_3+1,1),sig(1:n_3+1,2),sig(1:n_3+1,1),sig(1:n_3+1,3)&
         ,sig(1:n_3+1,1),sig(1:n_3+1,4),sig(1:n_3+1,1),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
         write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
-        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
         write(10,'(a,e24.12,a)') "yline(",stress_c,",'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
@@ -887,7 +887,7 @@ program main
         write(10,'(a)') "plot(sig(1:n_4+1,1),sig(1:n_4+1,2),sig(1:n_4+1,1),sig(1:n_4+1,3)&
         ,sig(1:n_4+1,1),sig(1:n_4+1,4),sig(1:n_4+1,1),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
         write(10,'(a)') "xlim([0 sig(n_4+1,1)]);"
-        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
         write(10,'(a,e24.12,a)') "yline(",stress_c,",'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
@@ -900,7 +900,7 @@ program main
         write(10,'(a)') "plot(sig(1:n_5+1,1),sig(1:n_5+1,2),sig(1:n_5+1,1),sig(1:n_5+1,3)&
         ,sig(1:n_5+1,1),sig(1:n_5+1,4),sig(1:n_5+1,1),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
         write(10,'(a)') "xlim([0 sig(n_5+1,1)]);"
-        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
         write(10,'(a,e24.12,a)') "yline(",stress_c,",'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
@@ -915,8 +915,7 @@ program main
         !\\\\\\\\\\\\\\\\\\\\\\\\\c-sig
         write(10,'(a)') "plot(sig(1:n_3+1,2),c(1:n_3+1,2),sig(1:n_3+1,3),c(1:n_3+1,3)&
         ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
-        write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
-        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
@@ -928,8 +927,7 @@ program main
 
         write(10,'(a)') "plot(sig(1:n_4+1,2),c(1:n_4+1,2),sig(1:n_4+1,3),c(1:n_4+1,3)&
         ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
-        write(10,'(a)') "xlim([0 sig(n_4+1,1)]);"
-        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
@@ -941,8 +939,7 @@ program main
 
         write(10,'(a)') "plot(sig(1:n_5+1,2),c(1:n_5+1,2),sig(1:n_5+1,3),c(1:n_5+1,3)&
         ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
-        write(10,'(a)') "xlim([0 sig(n_5+1,1)]);"
-        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
         write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
