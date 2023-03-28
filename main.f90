@@ -735,6 +735,7 @@ program main
     !================================================================
     subroutine output_matlab
         character(64) :: filename_m
+        character(5) :: step
         double precision :: strain_c
         strain_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
         filename_m='C:\Users\tanaka\Documents\phase_field_1d_newest_code\makevideo.m'
@@ -828,7 +829,7 @@ program main
 
         write(10,'(a)') "disp('energy.jpg is created');"
 
-        !\\\\\\\\\\\\\\\\\\\\\\\\\
+        !\\\\\\\\\\\\\\\\\\\\\\\\\sig-u
         write(10,'(a)') "clear;"
         write(10,'(a)') "count=1;"
         write(10,'(a,i,a)') "n_3=",count_3,";"
@@ -848,6 +849,7 @@ program main
         write(10,'(a,a,a)') "filename=append('",path,"\u\u_',filenum);"
         write(10,'(a)') "data=load(filename);"
         write(10,'(a,i,a)') "sig(i+1,1)=data(",num_nod,",2);"
+
         write(10,'(a,a,a)') "filename=append('",path,"\sig\sig_',filenum);"
         write(10,'(a)') "data=load(filename);"
         write(10,'(a)') "sig(i+1,2)=data(num_2,2);"
@@ -859,16 +861,70 @@ program main
         write(10,'(a)') "sig(i+1,5)=(sig(i+1,5)+data(num_5+1,2))/2;"
         write(10,'(a)') "sig(i+1,6)=data(num_6,2);"
 
+        write(10,'(a,a,a)') "filename=append('",path,"\c\c_',filenum);"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a,i,a)') "c(i+1,2)=data(",0,",2);"
+        write(10,'(a,i,a)') "c(i+1,3)=data(",nint(num_nod/4d0),",2);"
+        write(10,'(a,i,a)') "c(i+1,4)=data(",nint(num_nod/2d0),",2);"
+        write(10,'(a,i,a)') "c(i+1,5)=data(",nint(num_nod*3d0/4d0),",2);"
+        write(10,'(a,i,a)') "c(i+1,6)=data(",num_nod,",2);"
+
         write(10,'(a)') "end"
 
         write(10,'(a)') "plot(sig(1:n_3+1,1),sig(1:n_3+1,2),sig(1:n_3+1,1),sig(1:n_3+1,3)&
         ,sig(1:n_3+1,1),sig(1:n_3+1,4),sig(1:n_3+1,1),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
-        write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
-        write(10,'(a)') "legend('kinetic','strain','fracture','total','Location','NorthEastOutside');"
+        write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
-        write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy.jpg','-r600');"
+        write(step,"(I5.5)") count_3
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+
+        write(10,'(a)') "plot(sig(1:n_4+1,1),sig(1:n_4+1,2),sig(1:n_4+1,1),sig(1:n_4+1,3)&
+        ,sig(1:n_4+1,1),sig(1:n_4+1,4),sig(1:n_4+1,1),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_4+1,1)]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_4
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+
+        write(10,'(a)') "plot(sig(1:n_5+1,1),sig(1:n_5+1,2),sig(1:n_5+1,1),sig(1:n_5+1,3)&
+        ,sig(1:n_5+1,1),sig(1:n_5+1,4),sig(1:n_5+1,1),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_5+1,1)]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_5
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+
+        write(10,'(a)') "disp('sig-u.jpg is created');"
+
+        !\\\\\\\\\\\\\\\\\\\\\\\\\c-sig
+        write(10,'(a)') "plot(sig(1:n_3+1,2),c(1:n_3+1,2),sig(1:n_3+1,3),c(1:n_3+1,3)&
+        ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
+        write(10,'(a,e24.12,a)') "ylim([0 ",stress_c*1.1d0"]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,");"
+        write(10,'(a,e24.12,a)') "yline(",stress_c,");"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_3
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
 
         close(10)
     end subroutine output_matlab
