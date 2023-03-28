@@ -723,8 +723,8 @@ program main
         write(10,'(a,e24.12)') 'x1 = ',dx*(nint(num_nod/4d0)-1)
         write(10,'(a,e24.12)') 'x2 = ',dx*(nint(num_nod/2d0)-1)
         write(10,'(a,e24.12)') 'x3 = ',dx*(nint(3d0*num_nod/4d0)-1)
-        write(10,'(a,e24.12)') 'strain_c=',(Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0
-        write(10,'(a,e24.12)') 'stress_c=',9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
+        write(10,'(a,e24.12)') 'strain_c=',strain_c
+        write(10,'(a,e24.12)') 'stress_c=',stress_c
         write(10,'(a,e24.12)') 'strain_weak=',(Gc_weak/3d0/L_0/(lamda+2d0*myu))**0.5d0
         write(10,'(a,e24.12)') 'stress_weak=',9d0/16d0*((lamda+2d0*myu)*Gc_weak/3d0/L_0)**0.5d0
         ! write(10,'(a,e24.12)') 'energy_max=',energy_max
@@ -734,12 +734,11 @@ program main
     !ビデオを作るmatlabの.mファイルを作る
     !================================================================
     subroutine output_matlab
-        character(64) :: filename_m
+        character(79) :: filename_m
         character(5) :: step
-        double precision :: strain_c
-        strain_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
         filename_m='C:\Users\tanaka\Documents\phase_field_1d_newest_code\phase_field_1d\makevideo.m'
         open(10,file=filename_m,status='replace')
+
         write(10,'(a)') "clear;"
         write(10,'(a)') "count=1;"
         write(10,'(a,i,a)') "num=",int(total_timestep/output_interval/10d0),";"
@@ -895,7 +894,9 @@ program main
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_4
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
+        write(10,'(a,a,a,a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,1),sig(1:n_5+1,2),sig(1:n_5+1,1),sig(1:n_5+1,3)&
         ,sig(1:n_5+1,1),sig(1:n_5+1,4),sig(1:n_5+1,1),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
