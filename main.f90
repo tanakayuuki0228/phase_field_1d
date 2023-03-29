@@ -829,9 +829,9 @@ program main
         write(10,'(a)') "data_2=load(filename);"
         write(10,'(a)') "plot(data_1(:,1),data_1(:,2),data_1(:,1),data_1(:,3),data_1(:,1),data_1(:,4),&
         data_1(:,1),data_2(:,1));"
-        write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
+        write(10,'(a,e24.12,a)') "xlim([0 ",u(num_nod),"]);"
         write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
-        write(10,'(a,e24.12,a)') "xline(",u_break_3,",':');"
+        write(10,'(a,e24.12,a)') "xline(",u_break_3,",'-.');"
         write(10,'(a)') "legend('kinetic','strain','fracture','total','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
@@ -858,7 +858,7 @@ program main
         
         write(10,'(a)') "for i=0:n_5"
 
-        write(10,'(a)') "filenum=sprintf('%04u0',i);"
+        write(10,'(a)') "filenum=sprintf('%05u',i);"
         write(10,'(a,a,a)') "filename=append('",path,"\u\u_',filenum);"
         write(10,'(a)') "data=load(filename);"
         write(10,'(a,i,a)') "sig(i+1,1)=data(",num_nod,",2);"

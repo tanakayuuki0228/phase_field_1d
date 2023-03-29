@@ -71,15 +71,15 @@ module parameters
     integer,parameter :: timestep_stand=nint(1d0/10d0**5d0/dt)
     !変位速度が立ち上がる時間
     double precision,parameter :: time_stand=timestep_stand*dt
-    !総時間ステップ数
-    integer,parameter :: total_timestep=&
-    nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*L_x/v_end+time_stand/2d0)/dt*1.2d0)
-    ! integer,parameter :: total_timestep=100 !nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*2d0)**0.5d0/dt*1.2d0)!1000
-    !解析される総時間[s]
-    double precision,parameter :: analyzed_time=dt*total_timestep
     !準静的解
     double precision,parameter :: strain_c=(Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0
     double precision,parameter :: stress_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
+    !総時間ステップ数
+    integer,parameter :: total_timestep=nint((strain_c*L_x/v_end+time_stand)/dt*1.2d0)
+    ! integer,parameter :: total_timestep=100 !nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*2d0)**0.5d0/dt*1.2d0)!1000
+    !解析される総時間[s]
+    double precision,parameter :: analyzed_time=dt*total_timestep
+    
     !================================================================
     
 
