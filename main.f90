@@ -881,7 +881,9 @@ program main
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_3
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_4+1,1),sig(1:n_4+1,2),sig(1:n_4+1,1),sig(1:n_4+1,3)&
         ,sig(1:n_4+1,1),sig(1:n_4+1,4),sig(1:n_4+1,1),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
@@ -896,7 +898,7 @@ program main
         write(step,"(I5.5)") count_4
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,1),sig(1:n_5+1,2),sig(1:n_5+1,1),sig(1:n_5+1,3)&
         ,sig(1:n_5+1,1),sig(1:n_5+1,4),sig(1:n_5+1,1),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
@@ -909,7 +911,9 @@ program main
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_5
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "disp('sig-u.jpg is created');"
 
@@ -924,7 +928,9 @@ program main
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_3
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\c-sig_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_4+1,2),c(1:n_4+1,2),sig(1:n_4+1,3),c(1:n_4+1,3)&
         ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
@@ -936,7 +942,9 @@ program main
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_4
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\c-sig_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,2),c(1:n_5+1,2),sig(1:n_5+1,3),c(1:n_5+1,3)&
         ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
@@ -948,7 +956,9 @@ program main
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(step,"(I5.5)") count_5
-        write(10,'(a,a,a,a)') "print(fig,'-djpeg','",path,"\sig-u_",step,".jpg','-r600');"
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\c-sig_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "disp('c-sig.jpg is created');"
 
