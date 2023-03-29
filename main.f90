@@ -41,6 +41,7 @@ program main
     double precision :: energy_initial !t=0における運動エネルギー,ひずみエネルギー,破壊エネルギーの和
     double precision :: energy_max !グラフの縦軸用,エネルギーの最大値
     integer :: count_3,count_4,count_5 !c=0となったtimestepを記憶 
+    double precision :: u_break_3 !c=0となったときの右端変位
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
@@ -67,13 +68,12 @@ program main
     write(folder,"(I4.4,a,I2.2,a,I2.2,a,I2.2,a,I2.2)") &
     timevalue(1),'.',timevalue(2),'.',timevalue(3),'.',timevalue(5),'.',timevalue(6)
     path=path_//folder
-    write(command,*) 'mkdir -p ',path
+    write(command,*) 'mkdir ',path
     call system(command)
     !================================================================
 
     !パラメータの出力
     call output_para
-    call output_matlab
     !CFL条件を確認
     call CFL(dx,dt)
     call output_a_exa
@@ -187,6 +187,9 @@ program main
         end if
         !____________________________________________________________
     end do
+
+    !matlabのスプリクトを作成
+    call output_matlab
 
     !folderにコードをディレクトリごとコピー
     write(command,*) 'cp -r C:\Users\tanaka\Documents\phase_field_1d_newest_code\phase_field_1d ',path
@@ -442,7 +445,7 @@ program main
         character(5) :: name='\u\u_'
         character(int_path+10) :: filename
         double precision :: x
-        write(command,*) 'mkdir -p ',path,'\u'
+        write(command,*) 'mkdir ',path,'\u'
         if(t==0) then
             call system(command)
         end if
@@ -461,7 +464,7 @@ program main
         character(5) :: name='\v\v_'
         character(int_path+10) :: filename
         double precision :: x
-        write(command,*) 'mkdir -p ',path,'\v'
+        write(command,*) 'mkdir ',path,'\v'
         if(t==0) then
             call system(command)
         end if
@@ -480,7 +483,7 @@ program main
         character(5) :: name='\a\a_'
         character(int_path+10) :: filename
         double precision :: x
-        write(command,*) 'mkdir -p ',path,'\a'
+        write(command,*) 'mkdir ',path,'\a'
         if(t==0) then
             call system(command)
         end if
@@ -499,7 +502,7 @@ program main
         character(5) :: name='\c\c_'
         character(int_path+10) :: filename
         double precision :: x
-        write(command,*) 'mkdir -p ',path,'\c'
+        write(command,*) 'mkdir ',path,'\c'
         if(t==0) then
             call system(command)
         end if
@@ -518,7 +521,7 @@ program main
         character(9) :: name='\sig\sig_'
         character(int_path+14) :: filename
         double precision :: x,sig
-        write(command,*) 'mkdir -p ',path,'\sig'
+        write(command,*) 'mkdir ',path,'\sig'
         if(t==0) then
             call system(command)
         end if
@@ -541,7 +544,7 @@ program main
         character(16) :: name='\psi_ela\psi_ela_'
         character(int_path+21) :: filename
         double precision :: x,psi_ela
-        write(command,*) 'mkdir -p ',path,'\psi_ela'
+        write(command,*) 'mkdir ',path,'\psi_ela'
         if(t==0) then
             call system(command)
         end if
@@ -564,7 +567,7 @@ program main
         character(16) :: name='\psi_kin\psi_kin_'
         character(int_path+21) :: filename
         double precision :: x,psi_kin
-        write(command,*) 'mkdir -p ',path,'\psi_kin'
+        write(command,*) 'mkdir ',path,'\psi_kin'
         if(t==0) then
             call system(command)
         end if
@@ -584,7 +587,7 @@ program main
         character(16) :: name='\psi_fra\psi_fra_'
         character(int_path+21) :: filename
         double precision :: x,psi_fra
-        write(command,*) 'mkdir -p ',path,'\psi_fra'
+        write(command,*) 'mkdir ',path,'\psi_fra'
         if(t==0) then
             call system(command)
         end if
@@ -625,7 +628,7 @@ program main
         !出力
         if(t==0) then
             open(10,file=filename_1,status='replace')
-            write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') t,kinetic,strain,fracture
+            write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') u(num_nod),kinetic,strain,fracture
             close(10)
             open(10,file=filename_2,status='replace')
             write(10,'(e24.12)') total
@@ -635,7 +638,7 @@ program main
             energy_max=max(kinetic,strain,fracture)
         else
             open(10,file=filename_1,status='old',position='append')
-            write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') t,kinetic,strain,fracture
+            write(10,'(e24.12,1x,e24.12,1x,e24.12,1x,e24.12)') u(num_nod),kinetic,strain,fracture
             close(10)
             open(10,file=filename_2,status='old',position='append')
             write(10,'(e24.12)') total
@@ -670,6 +673,9 @@ program main
             do i=1,num_nod
                 if(c(i)<1d0/10d0**3d0) then
                     count_3=timestep/output_interval
+                    write(*,*) 'Break!'
+                    write(*,*) count_3
+                    u_break_3=u(num_nod)
                 end if
             end do
         end if
@@ -677,6 +683,8 @@ program main
             do i=1,num_nod
                 if(c(i)<1d0/10d0**4d0) then
                     count_4=timestep/output_interval
+                    write(*,*) 'Break!'
+                    write(*,*) count_4
                 end if
             end do
         end if
@@ -684,6 +692,8 @@ program main
             do i=1,num_nod
                 if(c(i)<1d0/10d0**5d0) then
                     count_5=timestep/output_interval
+                    write(*,*) 'Break!'
+                    write(*,*) count_5
                 end if
             end do
         end if
@@ -820,13 +830,15 @@ program main
         write(10,'(a)') "plot(data_1(:,1),data_1(:,2),data_1(:,1),data_1(:,3),data_1(:,1),data_1(:,4),&
         data_1(:,1),data_2(:,1));"
         write(10,'(a,e24.12,a)') "xlim([0 ",analyzed_time,"]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "xline(",u_break_3,",':');"
         write(10,'(a)') "legend('kinetic','strain','fracture','total','Location','NorthEastOutside');"
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
         write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy.jpg','-r600');"
 
-        write(10,'(a)') "disp('energy.jpg is created');"
+        write(10,'(a)') "disp('energy-u.jpg is created');"
 
         !\\\\\\\\\\\\\\\\\\\\\\\\\sig-u
         write(10,'(a)') "clear;"
@@ -834,11 +846,13 @@ program main
         write(10,'(a,i,a)') "n_3=",count_3,";"
         write(10,'(a,i,a)') "n_4=",count_4,";"
         write(10,'(a,i,a)') "n_5=",count_5,";"
-        write(10,'(a,i,a)') "num_2=",0,";"
+        write(10,'(a,i,a)') "num_2=",1,";"
         write(10,'(a,i,a)') "num_3=",nint(num_ele*2d0/4d0),";"
         write(10,'(a,i,a)') "num_4=",num_ele,";"
         write(10,'(a,i,a)') "num_5=",nint(num_ele*2d0/4d0*3d0),";"
         write(10,'(a,i,a)') "num_6=",num_ele*2,";"
+        write(10,'(a)') "sig=zeros(n_5+1,6);"
+        write(10,'(a)') "c=zeros(n_5+1,6);"
         
         write(10,'(a)') "fig=figure;"
         
@@ -862,7 +876,7 @@ program main
 
         write(10,'(a,a,a)') "filename=append('",path,"\c\c_',filenum);"
         write(10,'(a)') "data=load(filename);"
-        write(10,'(a,i,a)') "c(i+1,2)=data(",0,",2);"
+        write(10,'(a,i,a)') "c(i+1,2)=data(",1,",2);"
         write(10,'(a,i,a)') "c(i+1,3)=data(",nint(num_nod/4d0),",2);"
         write(10,'(a,i,a)') "c(i+1,4)=data(",nint(num_nod/2d0),",2);"
         write(10,'(a,i,a)') "c(i+1,5)=data(",nint(num_nod*3d0/4d0),",2);"
@@ -919,7 +933,7 @@ program main
 
         !\\\\\\\\\\\\\\\\\\\\\\\\\c-sig
         write(10,'(a)') "plot(sig(1:n_3+1,2),c(1:n_3+1,2),sig(1:n_3+1,3),c(1:n_3+1,3)&
-        ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),sig(1:n_3+1,5),sig(1:n_3+1,1),sig(1:n_3+1,6));"
+        ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),c(1:n_3+1,5),sig(1:n_3+1,1),c(1:n_3+1,6));"
         write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
@@ -933,7 +947,7 @@ program main
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_4+1,2),c(1:n_4+1,2),sig(1:n_4+1,3),c(1:n_4+1,3)&
-        ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
+        ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),c(1:n_4+1,5),sig(1:n_4+1,1),c(1:n_4+1,6));"
         write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
@@ -947,7 +961,7 @@ program main
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,2),c(1:n_5+1,2),sig(1:n_5+1,3),c(1:n_5+1,3)&
-        ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
+        ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),c(1:n_5+1,5),sig(1:n_5+1,1),c(1:n_5+1,6));"
         write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
