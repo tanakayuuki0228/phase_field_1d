@@ -51,7 +51,7 @@ module parameters
     !ガウス関数の立ち上がり時間を決めるパラメーター[s]
     double precision,parameter :: Gau=2d0*period
     !最終引張速度
-    double precision,parameter :: v_end=1.0d0/10d0**3d0
+    double precision,parameter :: v_end=1.0d0/10d0**5d0
     !================================================================
     
     
@@ -75,8 +75,8 @@ module parameters
     double precision,parameter :: strain_c=(Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0
     double precision,parameter :: stress_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
     !総時間ステップ数
-    integer,parameter :: total_timestep=nint((strain_c*L_x/v_end+time_stand)/dt*1.2d0)
-    ! integer,parameter :: total_timestep=100 !nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*2d0)**0.5d0/dt*1.2d0)!1000
+    ! integer,parameter :: total_timestep=nint((strain_c*L_x/v_end+time_stand)/dt*1.2d0)
+    integer,parameter :: total_timestep=nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*2d0)**0.5d0/dt*1.2d0)!加速度一定
     !解析される総時間[s]
     double precision,parameter :: analyzed_time=dt*total_timestep
     

@@ -203,18 +203,18 @@ program main
     !変位規定境界の変位，速度，加速度を更新するサブルーチン
     subroutine calc_pre_dis
         !(変位規定境界の)変位，速度，加速度を更新
-        if(t<time_stand) then
-            u(num_nod)=(t-time_stand/2d0/pi*sin(2d0*pi*t/time_stand))/2d0*v_end
-            v(num_nod)=(1d0-cos(2d0*pi*t/time_stand))/2d0*v_end
-            a(num_nod)=pi/time_stand*sin(2d0*pi*t/time_stand)*v_end
-        else
-            u(num_nod)=(t-time_stand/2d0)*v_end
-            v(num_nod)=v_end
-            a(num_nod)=0d0
-        end if
-        ! u(num_nod)=0.5d0*L_x*t**2d0 !Amp*Gauss(t,0)*sin(w*t)
-        ! v(num_nod)=L_x*t !Amp*(Gauss(t,1)*sin(w*t)+Gauss(t,0)*w*cos(w*t))
-        ! a(num_nod)=L_x !Amp*(Gauss(t,2)*sin(w*t)+2*Gauss(t,1)*w*cos(w*t)-Gauss(t,0)*w**2d0*sin(w*t))
+        ! if(t<time_stand) then
+        !     u(num_nod)=(t-time_stand/2d0/pi*sin(2d0*pi*t/time_stand))/2d0*v_end
+        !     v(num_nod)=(1d0-cos(2d0*pi*t/time_stand))/2d0*v_end
+        !     a(num_nod)=pi/time_stand*sin(2d0*pi*t/time_stand)*v_end
+        ! else
+        !     u(num_nod)=(t-time_stand/2d0)*v_end
+        !     v(num_nod)=v_end
+        !     a(num_nod)=0d0
+        ! end if
+        u(num_nod)=0.5d0*L_x*t**2d0 !Amp*Gauss(t,0)*sin(w*t)
+        v(num_nod)=L_x*t !Amp*(Gauss(t,1)*sin(w*t)+Gauss(t,0)*w*cos(w*t))
+        a(num_nod)=L_x !Amp*(Gauss(t,2)*sin(w*t)+2*Gauss(t,1)*w*cos(w*t)-Gauss(t,0)*w**2d0*sin(w*t))
     end subroutine calc_pre_dis
     !________________________________________________________________
     !変位を更新するサブルーチン
@@ -312,70 +312,9 @@ program main
     ! end subroutine calc_acceleration
     !________________________________________________________________
     !フェーズフィールドを更新するサブルーチン
-    ! subroutine calc_phasefield(c,u)
-    !     double precision,intent(in),dimension(:) :: u
-    !     double precision,intent(in out),dimension(:) :: c
-    !     !================================================================
-    !     !PARDISOの設定
-    !     !================================================================
-    !     !! integer,dimension(64),save :: pt !ここでptを宣言するとaccess violation がでる,原因は不明
-    !     integer,save :: maxfct
-    !     integer,save :: mnum
-    !     integer,save :: mtype
-    !     integer,save :: n
-    !     integer,save :: phase
-    !     integer,save,dimension(num_nod+1) :: ia
-    !     integer,save,dimension(2*num_nod-1) :: ja
-    !     integer,save,dimension(num_nod) :: perm
-    !     integer,save :: nrhs
-    !     integer,save,dimension(64) :: iparm
-    !     integer,save :: msglvl
-    !     integer,save :: error
-    !     if(t==0) then
-    !         pt=0
-    !         maxfct=1
-    !         mnum=1
-    !         mtype=-2 !実対称不定値行列,num_nod×num_nod三重対角行列
-    !         n=num_nod
-    !         phase=13
-    !         nrhs=1
-    !         iparm(1)=0 !iparm(1)=0で,iparm(2)-iparm(64)がdefaultに設定される
-    !         msglvl=0
-
-    !         !ia(i) aのうち,Kのi行で最初の要素のindex
-    !         do i=1,num_nod
-    !             ia(i)=2*i-1
-    !         end do
-
-    !         !ia(n+1) aの要素の数+1
-    !         ia(num_nod+1)=2*num_nod
-            
-    !         !ja(i) a(i)はKの第何列成分か
-    !         do i=1,num_nod
-    !             ja(2*i-1)=i
-    !         end do
-    !         do i=1,num_nod-1
-    !             ja(2*i)=i+1
-    !         end do
-    !     else if(t==dt) then
-    !         phase=23
-    !     else
-
-    !     end if
-    !     !================================================================
-    !     !左辺係数行列の計算
-    !     call calc_K(K,u)
-    !     !右辺ベクトルの計算
-    !     call calc_Bc(Bc)
-    !     !PARDISOで連立方程式を解く
-    !     call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c,error)
-    ! end subroutine calc_phasefield
-    !________________________________________________________________
-    !フェーズフィールドを更新するサブルーチン 両端c=0
     subroutine calc_phasefield(c,u)
         double precision,intent(in),dimension(:) :: u
         double precision,intent(in out),dimension(:) :: c
-        double precision,dimension(num_nod-2) :: c_sol
         !================================================================
         !PARDISOの設定
         !================================================================
@@ -385,9 +324,9 @@ program main
         integer,save :: mtype
         integer,save :: n
         integer,save :: phase
-        integer,save,dimension(num_nod-1) :: ia
-        integer,save,dimension(2*num_nod-5) :: ja
-        integer,save,dimension(num_nod-2) :: perm
+        integer,save,dimension(num_nod+1) :: ia
+        integer,save,dimension(2*num_nod-1) :: ja
+        integer,save,dimension(num_nod) :: perm
         integer,save :: nrhs
         integer,save,dimension(64) :: iparm
         integer,save :: msglvl
@@ -397,25 +336,25 @@ program main
             maxfct=1
             mnum=1
             mtype=-2 !実対称不定値行列,num_nod×num_nod三重対角行列
-            n=num_nod-2
+            n=num_nod
             phase=13
             nrhs=1
             iparm(1)=0 !iparm(1)=0で,iparm(2)-iparm(64)がdefaultに設定される
             msglvl=0
 
             !ia(i) aのうち,Kのi行で最初の要素のindex
-            do i=1,num_nod-2
+            do i=1,num_nod
                 ia(i)=2*i-1
             end do
 
             !ia(n+1) aの要素の数+1
-            ia(num_nod-1)=2*num_nod-4
+            ia(num_nod+1)=2*num_nod
             
             !ja(i) a(i)はKの第何列成分か
-            do i=1,num_nod-2
+            do i=1,num_nod
                 ja(2*i-1)=i
             end do
-            do i=1,num_nod-3
+            do i=1,num_nod-1
                 ja(2*i)=i+1
             end do
         else if(t==dt) then
@@ -427,13 +366,74 @@ program main
         !左辺係数行列の計算
         call calc_K(K,u)
         !右辺ベクトルの計算
-        call calc_Bc(Bc,u)
+        call calc_Bc(Bc)
         !PARDISOで連立方程式を解く
-        call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c_sol,error)
-        do i=2,num_nod-1
-            c(i)=c_sol(i-1)
-        end do
+        call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c,error)
     end subroutine calc_phasefield
+    !________________________________________________________________
+    ! !フェーズフィールドを更新するサブルーチン 両端c=1
+    ! subroutine calc_phasefield(c,u)
+    !     double precision,intent(in),dimension(:) :: u
+    !     double precision,intent(in out),dimension(:) :: c
+    !     double precision,dimension(num_nod-2) :: c_sol
+    !     !================================================================
+    !     !PARDISOの設定
+    !     !================================================================
+    !     !! integer,dimension(64),save :: pt !ここでptを宣言するとaccess violation がでる,原因は不明
+    !     integer,save :: maxfct
+    !     integer,save :: mnum
+    !     integer,save :: mtype
+    !     integer,save :: n
+    !     integer,save :: phase
+    !     integer,save,dimension(num_nod-1) :: ia
+    !     integer,save,dimension(2*num_nod-5) :: ja
+    !     integer,save,dimension(num_nod-2) :: perm
+    !     integer,save :: nrhs
+    !     integer,save,dimension(64) :: iparm
+    !     integer,save :: msglvl
+    !     integer,save :: error
+    !     if(t==0) then
+    !         pt=0
+    !         maxfct=1
+    !         mnum=1
+    !         mtype=-2 !実対称不定値行列,num_nod×num_nod三重対角行列
+    !         n=num_nod-2
+    !         phase=13
+    !         nrhs=1
+    !         iparm(1)=0 !iparm(1)=0で,iparm(2)-iparm(64)がdefaultに設定される
+    !         msglvl=0
+
+    !         !ia(i) aのうち,Kのi行で最初の要素のindex
+    !         do i=1,num_nod-2
+    !             ia(i)=2*i-1
+    !         end do
+
+    !         !ia(n+1) aの要素の数+1
+    !         ia(num_nod-1)=2*num_nod-4
+            
+    !         !ja(i) a(i)はKの第何列成分か
+    !         do i=1,num_nod-2
+    !             ja(2*i-1)=i
+    !         end do
+    !         do i=1,num_nod-3
+    !             ja(2*i)=i+1
+    !         end do
+    !     else if(t==dt) then
+    !         phase=23
+    !     else
+
+    !     end if
+    !     !================================================================
+    !     !左辺係数行列の計算
+    !     call calc_K(K,u)
+    !     !右辺ベクトルの計算
+    !     call calc_Bc(Bc,u)
+    !     !PARDISOで連立方程式を解く
+    !     call pardiso(pt,maxfct,mnum,mtype,phase,n,K,ia,ja,perm,nrhs,iparm,msglvl,Bc,c_sol,error)
+    !     do i=2,num_nod-1
+    !         c(i)=c_sol(i-1)
+    !     end do
+    ! end subroutine calc_phasefield
     !================================================================
     
     
@@ -933,7 +933,7 @@ program main
 
         !\\\\\\\\\\\\\\\\\\\\\\\\\c-sig
         write(10,'(a)') "plot(sig(1:n_3+1,2),c(1:n_3+1,2),sig(1:n_3+1,3),c(1:n_3+1,3)&
-        ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),c(1:n_3+1,5),sig(1:n_3+1,1),c(1:n_3+1,6));"
+        ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),c(1:n_3+1,5),sig(1:n_3+1,6),c(1:n_3+1,6));"
         write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
@@ -947,7 +947,7 @@ program main
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_4+1,2),c(1:n_4+1,2),sig(1:n_4+1,3),c(1:n_4+1,3)&
-        ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),c(1:n_4+1,5),sig(1:n_4+1,1),c(1:n_4+1,6));"
+        ,sig(1:n_4+1,4),c(1:n_4+1,4),sig(1:n_4+1,5),c(1:n_4+1,5),sig(1:n_4+1,6),c(1:n_4+1,6));"
         write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
@@ -961,7 +961,7 @@ program main
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,2),c(1:n_5+1,2),sig(1:n_5+1,3),c(1:n_5+1,3)&
-        ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),c(1:n_5+1,5),sig(1:n_5+1,1),c(1:n_5+1,6));"
+        ,sig(1:n_5+1,4),c(1:n_5+1,4),sig(1:n_5+1,5),c(1:n_5+1,5),sig(1:n_5+1,6),c(1:n_5+1,6));"
         write(10,'(a,e24.12,a)') "xlim([0 ",stress_c*1.1d0,"]);"
         write(10,'(a,e24.12,a)') "xline(",stress_c,",'--');"
         write(10,'(a)') "yline(0.75,'--');"
