@@ -41,7 +41,8 @@ program main
     double precision :: energy_initial !t=0における運動エネルギー,ひずみエネルギー,破壊エネルギーの和
     double precision :: energy_max !グラフの縦軸用,エネルギーの最大値
     integer :: count_3,count_4,count_5 !c=0となったtimestepを記憶 
-    double precision :: u_break_3 !c=0となったときの右端変位
+    double precision :: u_break_3,u_break_4,u_break_5 !c=0となったときの右端変位
+    double precision :: t_break_3,t_break_4,t_break_5 !c=0となったときの時刻
     !================================================================
     !pardisoが使う配列
     integer,dimension(64) :: pt
@@ -178,6 +179,7 @@ program main
             call output_psi_kin
             call output_energy
             call break_check
+            
             if(display_interval<100) then
                 if(t>analyzed_time*display_interval/100d0) then
                     write(*,'(i2,a)') display_interval,'% is completed'
@@ -676,6 +678,7 @@ program main
                     write(*,*) 'Break!'
                     write(*,*) count_3
                     u_break_3=u(num_nod)
+                    t_break_3=t
                 end if
             end do
         end if
@@ -685,6 +688,8 @@ program main
                     count_4=timestep/output_interval
                     write(*,*) 'Break!'
                     write(*,*) count_4
+                    u_break_4=u(num_nod)
+                    t_break_4=t
                 end if
             end do
         end if
@@ -694,6 +699,8 @@ program main
                     count_5=timestep/output_interval
                     write(*,*) 'Break!'
                     write(*,*) count_5
+                    u_break_4=u(num_nod)
+                    t_break_4=t
                 end if
             end do
         end if
@@ -749,6 +756,7 @@ program main
         filename_m='C:\Users\tanaka\Documents\phase_field_1d_newest_code\phase_field_1d\makevideo.m'
         open(10,file=filename_m,status='replace')
 
+        !\\\\\\\\\\\\\\\\\\\\\\\\\sig.mp4
         write(10,'(a)') "clear;"
         write(10,'(a)') "count=1;"
         write(10,'(a,i,a)') "num=",int(total_timestep/output_interval/10d0),";"
@@ -782,7 +790,7 @@ program main
 
         write(10,'(a)') "disp('sig.mp4 is created');"
 
-        !\\\\\\\\\\\\\\\\\\\\\\\\\
+        !\\\\\\\\\\\\\\\\\\\\\\\\\c.mp4
 
         write(10,'(a)') "clear;"
         write(10,'(a)') "count=1;"
@@ -818,7 +826,7 @@ program main
 
         write(10,'(a)') "disp('c.mp4 is created');"
 
-        !\\\\\\\\\\\\\\\\\\\\\\\\\
+        !\\\\\\\\\\\\\\\\\\\\\\\\\energy.mp4
 
         write(10,'(a)') "clear;"
         write(10,'(a)') "fig=figure;"
@@ -846,17 +854,18 @@ program main
         write(10,'(a,i,a)') "n_3=",count_3,";"
         write(10,'(a,i,a)') "n_4=",count_4,";"
         write(10,'(a,i,a)') "n_5=",count_5,";"
+        write(10,'(a,i,a)') "num=",int(total_timestep/output_interval),";"
         write(10,'(a,i,a)') "num_2=",1,";"
         write(10,'(a,i,a)') "num_3=",nint(num_ele*2d0/4d0),";"
         write(10,'(a,i,a)') "num_4=",num_ele,";"
         write(10,'(a,i,a)') "num_5=",nint(num_ele*2d0/4d0*3d0),";"
         write(10,'(a,i,a)') "num_6=",num_ele*2,";"
-        write(10,'(a)') "sig=zeros(n_5+1,6);"
-        write(10,'(a)') "c=zeros(n_5+1,6);"
+        write(10,'(a)') "sig=zeros(num+1,6);"
+        write(10,'(a)') "c=zeros(num+1,6);"
         
         write(10,'(a)') "fig=figure;"
         
-        write(10,'(a)') "for i=0:n_5"
+        write(10,'(a)') "for i=0:num"
 
         write(10,'(a)') "filenum=sprintf('%05u',i);"
         write(10,'(a,a,a)') "filename=append('",path,"\u\u_',filenum);"
@@ -931,6 +940,51 @@ program main
 
         write(10,'(a)') "disp('sig-u.jpg is created');"
 
+        !\\\\\\\\\\\\\\\\\\\\\\\\\c-u
+        write(10,'(a)') "plot(sig(1:n_3+1,1),c(1:n_3+1,2),sig(1:n_3+1,1),c(1:n_3+1,3)&
+        ,sig(1:n_3+1,1),c(1:n_3+1,4),sig(1:n_3+1,1),c(1:n_3+1,5),sig(1:n_3+1,1),c(1:n_3+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_3+1,1)]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "yline(0.75,'--');"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_3
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(10,'(a)') "plot(sig(1:n_4+1,1),c(1:n_4+1,2),sig(1:n_4+1,1),c(1:n_4+1,3)&
+        ,sig(1:n_4+1,1),c(1:n_4+1,4),sig(1:n_4+1,1),c(1:n_4+1,5),sig(1:n_4+1,1),c(1:n_4+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_4+1,1)]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "yline(0.75,'--');"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_4
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(10,'(a)') "plot(sig(1:n_5+1,1),c(1:n_5+1,2),sig(1:n_5+1,1),c(1:n_5+1,3)&
+        ,sig(1:n_5+1,1),c(1:n_5+1,4),sig(1:n_5+1,1),c(1:n_5+1,5),sig(1:n_5+1,1),c(1:n_5+1,6));"
+        write(10,'(a)') "xlim([0 sig(n_5+1,1)]);"
+        write(10,'(a,e24.12,a)') "xline(",strain_c*L_x,",'--');"
+        write(10,'(a,e24.12,a)') "yline(0.75,'--');"
+        write(10,'(a)') "legend('x=0','x=L/4','x=L/2','x=3L/4','x=L','Location','NorthEastOutside');"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(step,"(I5.5)") count_5
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(10,'(a)') "disp('c-u.jpg is created');"
+
         !\\\\\\\\\\\\\\\\\\\\\\\\\c-sig
         write(10,'(a)') "plot(sig(1:n_3+1,2),c(1:n_3+1,2),sig(1:n_3+1,3),c(1:n_3+1,3)&
         ,sig(1:n_3+1,4),c(1:n_3+1,4),sig(1:n_3+1,5),c(1:n_3+1,5),sig(1:n_3+1,6),c(1:n_3+1,6));"
@@ -975,6 +1029,86 @@ program main
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "disp('c-sig.jpg is created');"
+
+        !\\\\\\\\\\\\\\\\\\\\\\\\\c-x
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(step,"(I5.5)") count_3
+        write(10,'(a,a,a)') "filename=append(name,'\c\c_",step,"');"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "L_x=",L_x,";"
+        write(10,'(a)') "xlim([0 L_x]);"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "filename=append(name,'\c_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(step,"(I5.5)") count_4
+        write(10,'(a,a,a)') "filename=append(name,'\c\c_",step,"');"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "L_x=",L_x,";"
+        write(10,'(a)') "xlim([0 L_x]);"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "filename=append(name,'\c_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(step,"(I5.5)") count_5
+        write(10,'(a,a,a)') "filename=append(name,'\c\c_",step,"');"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "L_x=",L_x,";"
+        write(10,'(a)') "xlim([0 L_x]);"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "filename=append(name,'\c_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(10,'(a)') "disp('c-x.jpg is created');"
+
+        !\\\\\\\\\\\\\\\\\\\\\\\\\sig-x
+        write(10,'(a,a,a)') "name='",path,"';"
+        write(step,"(I5.5)") count_3
+        write(10,'(a,a,a)') "filename=append(name,'\sig\sig_",step,"');"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "L_x=",L_x,";"
+        write(10,'(a)') "xlim([0 L_x]);"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-x_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(step,"(I5.5)") count_4
+        write(10,'(a,a,a)') "filename=append(name,'\sig\sig_",step,"');"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "L_x=",L_x,";"
+        write(10,'(a)') "xlim([0 L_x]);"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-x_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(step,"(I5.5)") count_5
+        write(10,'(a,a,a)') "filename=append(name,'\sig\sig_",step,"');"
+        write(10,'(a)') "data=load(filename);"
+        write(10,'(a)') "plot(data(:,1),data(:,2));"
+        write(10,'(a,e24.12,a)') "L_x=",L_x,";"
+        write(10,'(a)') "xlim([0 L_x]);"
+        write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
+        write(10,'(a)') "colororder(newcolors);"
+        write(10,'(a)') "drawnow;"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-x_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+
+        write(10,'(a)') "disp('sig-x.jpg is created');"
 
         close(10)
     end subroutine output_matlab
