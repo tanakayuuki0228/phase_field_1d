@@ -62,9 +62,9 @@ module parameters
     !x方向全長[m]
     double precision,parameter :: L_x=0.1d0
     !亀裂近似幅に影響する微小パラメーター[m]
-    double precision,parameter :: L_0=0.01d0
+    double precision,parameter :: L_0=0.005d0
     !x方向メッシュサイズ[m]（代表長）
-    double precision,parameter :: dx=L_0/5d0
+    double precision,parameter :: dx=L_0/5d0*2d0
     !時間ステップ幅[s]
     double precision,parameter :: dt=dx/v_d
     !変位速度を立ち上げるまでのステップ数

@@ -777,7 +777,10 @@ program main
         write(10,'(a)') "[sigmax,index]=max(data(:,2));"
         write(10,'(a)') "plot(data(:,1),data(:,2),data(index,1),data(index,2),'pentagram');"
         write(10,'(a,e24.12,a)') "xlim([0 ",L_x,"]);"
-        write(10,'(a,e24.12,1x,e24.12,a)') "ylim([",-1.1d0*strain_c,1.1d0*strain_c,"]);"
+        write(10,'(a,e24.12,1x,e24.12,a)') "ylim([",-1.1d0*stress_c,1.1d0*stress_c,"]);"
+        write(10,'(a,e24.12,a)') "tim=sprintf('%.2e',",dt*output_interval*10d0,"*i);"
+        write(10,'(a)') "time=append(tim,' [s]');"
+        write(10,'(a)') "title(time);"
         write(10,'(a)') "drawnow;"
         write(10,'(a)') "frames(i+1)=getframe(fig);"
         write(10,'(a)') "end"
@@ -812,6 +815,9 @@ program main
         write(10,'(a)') "plot(data(:,1),data(:,2));"
         write(10,'(a,e24.12,a)') "xlim([0 ",L_x,"]);"
         write(10,'(a)') "ylim([-0.01 1.01]);"
+        write(10,'(a,e24.12,a)') "tim=sprintf('%.2e',",dt*output_interval*10d0,"*i);"
+        write(10,'(a)') "time=append(tim,' [s]');"
+        write(10,'(a)') "title(time);"
         write(10,'(a)') "drawnow;"
         write(10,'(a)') "frames(i+1)=getframe(fig);"
 
@@ -826,7 +832,7 @@ program main
 
         write(10,'(a)') "disp('c.mp4 is created');"
 
-        !\\\\\\\\\\\\\\\\\\\\\\\\\energy.mp4
+        !\\\\\\\\\\\\\\\\\\\\\\\\\energy-u
 
         write(10,'(a)') "clear;"
         write(10,'(a)') "fig=figure;"
@@ -844,7 +850,7 @@ program main
         write(10,'(a)') "newcolors={'#FF4B00','#005AFF','#03AF7A','#000000','#FFF100'};"
         write(10,'(a)') "colororder(newcolors);"
         write(10,'(a)') "drawnow;"
-        write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy.jpg','-r600');"
+        write(10,'(a,a,a)') "print(fig,'-djpeg','",path,"\energy-u.jpg','-r600');"
 
         write(10,'(a)') "disp('energy-u.jpg is created');"
 
@@ -907,6 +913,9 @@ program main
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a,e24.12,a)') "xlim([",strain_c*L_x*0.9," sig(n_3+1,1)]);"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,"_detail.jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_4+1,1),sig(1:n_4+1,2),sig(1:n_4+1,1),sig(1:n_4+1,3)&
         ,sig(1:n_4+1,1),sig(1:n_4+1,4),sig(1:n_4+1,1),sig(1:n_4+1,5),sig(1:n_4+1,1),sig(1:n_4+1,6));"
@@ -922,6 +931,9 @@ program main
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a,e24.12,a)') "xlim([",strain_c*L_x*0.9," sig(n_4+1,1)]);"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,"_detail.jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,1),sig(1:n_5+1,2),sig(1:n_5+1,1),sig(1:n_5+1,3)&
         ,sig(1:n_5+1,1),sig(1:n_5+1,4),sig(1:n_5+1,1),sig(1:n_5+1,5),sig(1:n_5+1,1),sig(1:n_5+1,6));"
@@ -936,6 +948,9 @@ program main
         write(step,"(I5.5)") count_5
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a,e24.12,a)') "xlim([",strain_c*L_x*0.9," sig(n_5+1,1)]);"
+        write(10,'(a,a,a)') "filename=append(name,'\sig-u_",step,"_detail.jpg');"
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "disp('sig-u.jpg is created');"
@@ -954,6 +969,9 @@ program main
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,".jpg');"
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a,e24.12,a)') "xlim([",strain_c*L_x*0.9," sig(n_3+1,1)]);"
+        write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,"_detail.jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_4+1,1),c(1:n_4+1,2),sig(1:n_4+1,1),c(1:n_4+1,3)&
         ,sig(1:n_4+1,1),c(1:n_4+1,4),sig(1:n_4+1,1),c(1:n_4+1,5),sig(1:n_4+1,1),c(1:n_4+1,6));"
@@ -968,6 +986,9 @@ program main
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,".jpg');"
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a,e24.12,a)') "xlim([",strain_c*L_x*0.9," sig(n_4+1,1)]);"
+        write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,"_detail.jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "plot(sig(1:n_5+1,1),c(1:n_5+1,2),sig(1:n_5+1,1),c(1:n_5+1,3)&
         ,sig(1:n_5+1,1),c(1:n_5+1,4),sig(1:n_5+1,1),c(1:n_5+1,5),sig(1:n_5+1,1),c(1:n_5+1,6));"
@@ -981,6 +1002,9 @@ program main
         write(step,"(I5.5)") count_5
         write(10,'(a,a,a)') "name='",path,"';"
         write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,".jpg');"
+        write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
+        write(10,'(a,e24.12,a)') "xlim([",strain_c*L_x*0.9," sig(n_5+1,1)]);"
+        write(10,'(a,a,a)') "filename=append(name,'\c-u_",step,"_detail.jpg');"
         write(10,'(a)') "print(fig,'-djpeg',filename,'-r600');"
 
         write(10,'(a)') "disp('c-u.jpg is created');"
