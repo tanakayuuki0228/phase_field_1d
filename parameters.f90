@@ -30,7 +30,7 @@ module parameters
     double precision,parameter :: v_R=(0.862d0+1.14d0*nyu)*v_s/(1d0+nyu)
     !Griffithの破壊エネルギー[J/m**2]
     double precision,parameter :: Gc=3d0
-    double precision,parameter :: Gc_weak=Gc !*0.9d0
+    double precision,parameter :: Gc_weak=Gc!*0.8d0
     !================================================================    
     
     
@@ -51,7 +51,7 @@ module parameters
     !ガウス関数の立ち上がり時間を決めるパラメーター[s]
     double precision,parameter :: Gau=2d0*period
     !最終引張速度
-    double precision,parameter :: v_end=1.0d0/10d0**5d0
+    double precision,parameter :: v_end=1.0d0/10d0**4d0
     !================================================================
     
     
@@ -62,9 +62,9 @@ module parameters
     !x方向全長[m]
     double precision,parameter :: L_x=0.1d0
     !亀裂近似幅に影響する微小パラメーター[m]
-    double precision,parameter :: L_0=0.005d0
+    double precision,parameter :: L_0=0.01d0
     !x方向メッシュサイズ[m]（代表長）
-    double precision,parameter :: dx=L_0/5d0*2d0
+    double precision,parameter :: dx=0.002d0!L_0/5d0
     !時間ステップ幅[s]
     double precision,parameter :: dt=dx/v_d
     !変位速度を立ち上げるまでのステップ数
@@ -76,7 +76,7 @@ module parameters
     double precision,parameter :: stress_c=9d0/16d0*((lamda+2d0*myu)*Gc/3d0/L_0)**0.5d0
     !総時間ステップ数
     ! integer,parameter :: total_timestep=nint((strain_c*L_x/v_end+time_stand)/dt*1.2d0)
-    integer,parameter :: total_timestep=nint(((Gc/3d0/L_0/(lamda+2d0*myu))**0.5d0*2d0)**0.5d0/dt*1.2d0)!加速度一定
+    integer,parameter :: total_timestep=nint((strain_c*2d0)**0.5d0/dt*1.2d0)!加速度一定
     !解析される総時間[s]
     double precision,parameter :: analyzed_time=dt*total_timestep
     
